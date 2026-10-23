@@ -92,7 +92,7 @@ export default function Dashboard(){
      <article className="ag-panel ag-advice"><h2><ShieldCheck size={20}/> Fuentes verificables</h2><p>NASA POWER suministra estadísticas ambientales. GIBS muestra imágenes de la Tierra. HLS podrá aportar bandas para calcular índices de vegetación.</p><a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">Fuente NASA POWER <ExternalLink size={15}/></a></article>
     </div>
    </section>
-   </>}
+   </> : null}
    <footer className="ag-footer">AGRONEX · Prototipo de investigación · Los datos de teledetección no sustituyen diagnósticos de campo.</footer>
   </div>
  </div>
