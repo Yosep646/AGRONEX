@@ -1,6 +1,5 @@
 "use client";
 import {useEffect,useState} from "react";
-import {useSearchParams} from "next/navigation";
 import Link from "next/link";
 import {Leaf,LayoutDashboard,Satellite,CloudSun,BrainCircuit,MapPin,ShieldCheck,Droplets,Sun,RefreshCw,ArrowUpRight,Database,Activity,BarChart3,ExternalLink} from "lucide-react";
 import {getSupabase} from "../../lib/supabase";
@@ -12,7 +11,6 @@ const initial={latitude:-9.93,longitude:-76.24,start:"2025-01-01",end:"2025-01-3
 function validValues(source?:Record<string,number|null>): [string,number][]{return Object.entries(source||{}).filter((entry):entry is [string,number]=>typeof entry[1]==="number"&&Number.isFinite(entry[1])&&entry[1]>-900)}
 function mean(source?:Record<string,number|null>){const a=validValues(source);return a.length?(a.reduce((sum,[,v])=>sum+v,0)/a.length).toFixed(1):"—"}
 export default function Dashboard(){
- const searchParams=useSearchParams();
  const [section,setSection]=useState<"overview"|"parcels">("overview");
  const [loginEmail,setLoginEmail]=useState("");
  const [loginPassword,setLoginPassword]=useState("");
@@ -22,7 +20,7 @@ export default function Dashboard(){
  const [parcelArea,setParcelArea]=useState("");
  const [parcelStatus,setParcelStatus]=useState("");
  const [formBusy,setFormBusy]=useState(false);
- useEffect(()=>{if(searchParams.get("section")==="parcels")setSection("parcels")},[searchParams]);
+ useEffect(()=>{if(new URLSearchParams(window.location.search).get("section")==="parcels")setSection("parcels")},[]);
  const [parcels,setParcels]=useState<Parcel[]>([]);
  const [selectedParcelId,setSelectedParcelId]=useState("");
  const [weather,setWeather]=useState<Weather|null>(null);
