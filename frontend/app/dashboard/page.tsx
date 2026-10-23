@@ -7,7 +7,7 @@ import {getParcels,getWeather,type Parcel,type Weather,API_URL} from "../../lib/
 
 const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/#parcels"},{name:"Visión satelital",icon:Satellite,href:"/satellite"},{name:"Clima NASA",icon:CloudSun,href:"/#satellite"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard#inteligencia"}];
 const initial={latitude:-9.93,longitude:-76.24,start:"2025-01-01",end:"2025-01-31"};
-function validValues(source?:Record<string,number|null>){return Object.entries(source||{}).filter(([,v]):v is number=>typeof v==="number"&&Number.isFinite(v)&&v>-900)}
+function validValues(source?:Record<string,number|null>): [string,number][]{return Object.entries(source||{}).filter((entry):entry is [string,number]=>typeof entry[1]==="number"&&Number.isFinite(entry[1])&&entry[1]>-900)}
 function mean(source?:Record<string,number|null>){const a=validValues(source);return a.length?(a.reduce((sum,[,v])=>sum+v,0)/a.length).toFixed(1):"—"}
 export default function Dashboard(){
  const [parcels,setParcels]=useState<Parcel[]>([]);
