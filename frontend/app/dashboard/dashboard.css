@@ -24,3 +24,11 @@
 .ag-map-coordinate{right:auto;left:12px;bottom:48px}
 .ag-satellite-widget .ag-map-bottom{padding-top:12px}
 @media(max-width:750px){.ag-sat-map{height:315px}.ag-sat-toolbar label{width:100%;justify-content:space-between}.ag-sat-expand{margin-left:0}}
+
+.ag-parcel-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0 5px;font-size:12px;color:#587361}
+.ag-parcel-picker label{font-weight:700;color:#24523b}
+.ag-parcel-picker select{background:#f5faf5;border:1px solid #d6e7da;border-radius:8px;padding:9px;min-width:190px;max-width:100%;color:#1a4f34}
+.ag-parcel-picker span{color:#789184;font-size:11px}
+.ag-parcel[role="button"]{cursor:pointer}
+.ag-parcel[role="button"]:hover{background:#f2f9f3}
+.ag-parcel[role="button"]:focus-visible{outline:2px solid #229b60;outline-offset:2px}
