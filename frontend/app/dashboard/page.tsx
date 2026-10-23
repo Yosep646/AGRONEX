@@ -12,6 +12,7 @@ function validValues(source?:Record<string,number|null>): [string,number][]{retu
 function mean(source?:Record<string,number|null>){const a=validValues(source);return a.length?(a.reduce((sum,[,v])=>sum+v,0)/a.length).toFixed(1):"—"}
 export default function Dashboard(){
  const [parcels,setParcels]=useState<Parcel[]>([]);
+ const [selectedParcelId,setSelectedParcelId]=useState("");
  const [weather,setWeather]=useState<Weather|null>(null);
  const [error,setError]=useState("");
  const [busy,setBusy]=useState(false);
@@ -54,7 +55,8 @@ export default function Dashboard(){
     <div className="ag-left">
      <article className="ag-panel ag-map">
       <div className="ag-panel-title"><div><h2><Satellite size={21}/> Visión satelital NASA</h2><p>Imágenes reales MODIS Terra mediante NASA GIBS</p></div><Link className="ag-action" href="/satellite">Explorar mapa <ArrowUpRight size={16}/></Link></div>
-      <SatelliteMap compact latitude={coords.latitude} longitude={coords.longitude}/>
+      <div className="ag-parcel-picker"><label htmlFor="ag-parcel-select">Parcela en el mapa</label><select id="ag-parcel-select" value={selectedParcelId} onChange={e=>{const id=e.target.value;setSelectedParcelId(id);const p=parcels.find(x=>x.id===id);if(p)setCoords(v=>({...v,latitude:p.latitude,longitude:p.longitude}));}}><option value="">Ubicación de referencia · Huánuco</option>{parcels.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select><span>{parcels.length? "Selecciona una parcela para centrar el mapa":"Inicia sesión y registra una parcela para mostrar su ubicación"}</span></div>
+      <SatelliteMap compact latitude={coords.latitude} longitude={coords.longitude} parcels={parcels} selectedParcelId={selectedParcelId}/>
      </article>
      <article className="ag-panel">
        <div className="ag-panel-title"><div><h2><CloudSun size={21}/> Clima y observaciones</h2><p>NASA POWER · consultas históricas por ubicación</p></div><button className="ag-action" onClick={refresh} disabled={busy}><RefreshCw size={16}/>{busy?"Consultando...":"Consultar"}</button></div>
@@ -67,7 +69,7 @@ export default function Dashboard(){
     </div>
     <div className="ag-right">
      <article className="ag-panel" id="inteligencia"><div className="ag-panel-title"><div><h2><BrainCircuit size={21}/> Inteligencia artificial</h2><p>Entrenamiento ML / DL y evaluación</p></div></div><div className="ag-model-row"><span className="ag-dot green"/><div><b>Random Forest</b><small>Predicción experimental de precipitación</small></div><span className="ag-status">{models?.ml==="trained"?"Entrenado":"Sin pesos"}</span></div><div className="ag-model-row"><span className="ag-dot purple"/><div><b>LSTM · PyTorch</b><small>Aprendizaje de series temporales</small></div><span className="ag-status">No desplegado</span></div><p className="ag-disclaimer">No mostramos pronósticos ni consejos agrícolas inventados. Los modelos requieren datos, validación y despliegue de artefactos.</p></article>
-     <article className="ag-panel"><div className="ag-panel-title"><div><h2><BarChart3 size={21}/> Mis parcelas</h2><p>Información guardada en Supabase</p></div><Link href="/manage" className="ag-link">Gestionar →</Link></div>{parcels.length?parcels.slice(0,5).map(p=><div className="ag-parcel" key={p.id}><span><MapPin size={19}/></span><div><b>{p.name}</b><small>{p.area_ha? p.area_ha+" ha · ":""}{p.latitude.toFixed(3)}, {p.longitude.toFixed(3)}</small></div></div>):<p className="ag-muted">{email?"No hay parcelas registradas.":"Inicia sesión en Mis parcelas para ver tus terrenos."}</p>}</article>
+     <article className="ag-panel"><div className="ag-panel-title"><div><h2><BarChart3 size={21}/> Mis parcelas</h2><p>Información guardada en Supabase</p></div><Link href="/manage" className="ag-link">Gestionar →</Link></div>{parcels.length?parcels.slice(0,5).map(p=><div className="ag-parcel" key={p.id} role="button" tabIndex={0} title="Ubicar parcela en mapa" onClick={()=>{setSelectedParcelId(p.id);setCoords(v=>({...v,latitude:p.latitude,longitude:p.longitude}));}} onKeyDown={e=>{if(e.key==="Enter"){setSelectedParcelId(p.id);setCoords(v=>({...v,latitude:p.latitude,longitude:p.longitude}));}}}><span><MapPin size={19}/></span><div><b>{p.name}</b><small>{p.area_ha? p.area_ha+" ha · ":""}{p.latitude.toFixed(3)}, {p.longitude.toFixed(3)}</small></div></div>):<p className="ag-muted">{email?"No hay parcelas registradas.":"Inicia sesión en Mis parcelas para ver tus terrenos."}</p>}</article>
      <article className="ag-panel ag-advice"><h2><ShieldCheck size={20}/> Fuentes verificables</h2><p>NASA POWER suministra estadísticas ambientales. GIBS muestra imágenes de la Tierra. HLS podrá aportar bandas para calcular índices de vegetación.</p><a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">Fuente NASA POWER <ExternalLink size={15}/></a></article>
     </div>
    </section>
