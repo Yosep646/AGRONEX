@@ -3,6 +3,7 @@ import {useEffect,useState} from "react";
 import Link from "next/link";
 import {Leaf,LayoutDashboard,Satellite,CloudSun,BrainCircuit,MapPin,ShieldCheck,Droplets,Sun,RefreshCw,ArrowUpRight,Database,Activity,BarChart3,ExternalLink} from "lucide-react";
 import {getSupabase} from "../../lib/supabase";
+import SatelliteMap from "../../components/SatelliteMap";
 import {getParcels,getWeather,type Parcel,type Weather,API_URL} from "../../lib/api";
 
 const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/manage"},{name:"Visión satelital",icon:Satellite,href:"/satellite"},{name:"Clima NASA",icon:CloudSun,href:"/manage"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard#inteligencia"}];
@@ -53,8 +54,7 @@ export default function Dashboard(){
     <div className="ag-left">
      <article className="ag-panel ag-map">
       <div className="ag-panel-title"><div><h2><Satellite size={21}/> Visión satelital NASA</h2><p>Imágenes reales MODIS Terra mediante NASA GIBS</p></div><Link className="ag-action" href="/satellite">Explorar mapa <ArrowUpRight size={16}/></Link></div>
-      <Link href="/satellite" className="ag-map-preview"><div className="ag-map-copy"><span className="ag-pill">NASA Earth Observation</span><h3>Observa tus parcelas desde el espacio</h3><p>Explora imágenes por fecha y posición. La evaluación NDVI con HLS es una fase independiente.</p><span className="ag-open">Abrir visor satelital <ArrowUpRight size={17}/></span></div><div className="ag-orbit">◎</div></Link>
-      <div className="ag-map-bottom"><span><Satellite size={15}/> NASA GIBS</span><span><Database size={15}/> HLS pendiente de procesamiento</span></div>
+      <SatelliteMap compact latitude={coords.latitude} longitude={coords.longitude}/>
      </article>
      <article className="ag-panel">
        <div className="ag-panel-title"><div><h2><CloudSun size={21}/> Clima y observaciones</h2><p>NASA POWER · consultas históricas por ubicación</p></div><button className="ag-action" onClick={refresh} disabled={busy}><RefreshCw size={16}/>{busy?"Consultando...":"Consultar"}</button></div>
