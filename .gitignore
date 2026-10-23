@@ -1,0 +1,23 @@
+# Variables privadas
+.env
+.env.*
+!.env.example
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+# Node
+node_modules/
+.next/
+dist/
+# Modelos y datos voluminosos
+*.pt
+*.pth
+*.joblib
+*.pkl
+*.parquet
+data/raw/
+data/processed/
+# Sistema
+.DS_Store
