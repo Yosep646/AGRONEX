@@ -1,16 +1,28 @@
 "use client";
 import {useEffect,useState} from "react";
+import {useSearchParams} from "next/navigation";
 import Link from "next/link";
 import {Leaf,LayoutDashboard,Satellite,CloudSun,BrainCircuit,MapPin,ShieldCheck,Droplets,Sun,RefreshCw,ArrowUpRight,Database,Activity,BarChart3,ExternalLink} from "lucide-react";
 import {getSupabase} from "../../lib/supabase";
 import SatelliteMap from "../../components/SatelliteMap";
-import {getParcels,getWeather,type Parcel,type Weather,API_URL} from "../../lib/api";
+import {addParcel,getParcels,getWeather,type Parcel,type Weather,API_URL} from "../../lib/api";
 
-const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/manage"},{name:"Visión satelital",icon:Satellite,href:"/satellite"},{name:"Clima NASA",icon:CloudSun,href:"/manage"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard#inteligencia"}];
+const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/dashboard?section=parcels"},{name:"Visión satelital",icon:Satellite,href:"/satellite"},{name:"Clima NASA",icon:CloudSun,href:"/manage"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard#inteligencia"}];
 const initial={latitude:-9.93,longitude:-76.24,start:"2025-01-01",end:"2025-01-31"};
 function validValues(source?:Record<string,number|null>): [string,number][]{return Object.entries(source||{}).filter((entry):entry is [string,number]=>typeof entry[1]==="number"&&Number.isFinite(entry[1])&&entry[1]>-900)}
 function mean(source?:Record<string,number|null>){const a=validValues(source);return a.length?(a.reduce((sum,[,v])=>sum+v,0)/a.length).toFixed(1):"—"}
 export default function Dashboard(){
+ const searchParams=useSearchParams();
+ const [section,setSection]=useState<"overview"|"parcels">("overview");
+ const [loginEmail,setLoginEmail]=useState("");
+ const [loginPassword,setLoginPassword]=useState("");
+ const [authError,setAuthError]=useState("");
+ const [token,setToken]=useState("");
+ const [parcelName,setParcelName]=useState("");
+ const [parcelArea,setParcelArea]=useState("");
+ const [parcelStatus,setParcelStatus]=useState("");
+ const [formBusy,setFormBusy]=useState(false);
+ useEffect(()=>{if(searchParams.get("section")==="parcels")setSection("parcels")},[searchParams]);
  const [parcels,setParcels]=useState<Parcel[]>([]);
  const [selectedParcelId,setSelectedParcelId]=useState("");
  const [weather,setWeather]=useState<Weather|null>(null);
@@ -21,7 +33,7 @@ export default function Dashboard(){
  const [models,setModels]=useState<{ml:string;dl:string}|null>(null);
  useEffect(()=>{
   const supabase=getSupabase();
-  const update=async()=>{const session=await supabase?.auth.getSession();const t=session?.data.session?.access_token||"";setEmail(session?.data.session?.user.email||"");if(t)getParcels(t).then(setParcels).catch(()=>setParcels([]));else setParcels([])};
+  const update=async()=>{const session=await supabase?.auth.getSession();const t=session?.data.session?.access_token||"";setEmail(session?.data.session?.user.email||"");setToken(t);if(t)getParcels(t).then(setParcels).catch(()=>setParcels([]));else setParcels([])};
   void update();
   const sub=supabase?.auth.onAuthStateChange(()=>{void update()});
   fetch(API_URL+"/api/models/status").then(r=>r.ok?r.json():null).then(setModels).catch(()=>setModels(null));
@@ -33,18 +45,26 @@ export default function Dashboard(){
   catch(e){setError(e instanceof Error?e.message:"Error al consultar NASA")}
   finally{setBusy(false)}
  }
+ async function signIn(){const sb=getSupabase();if(!sb){setAuthError("Configura Supabase en Render.");return;}setFormBusy(true);setAuthError("");const {error}=await sb.auth.signInWithPassword({email:loginEmail,password:loginPassword});setFormBusy(false);if(error)setAuthError(error.message);else setLoginPassword("");}
+ async function saveParcel(){if(!token){setParcelStatus("Inicia sesión para registrar parcelas.");return;}setFormBusy(true);setParcelStatus("");try{await addParcel(token,{name:parcelName.trim(),latitude:coords.latitude,longitude:coords.longitude,...(parcelArea?{area_ha:Number(parcelArea)}:{})});setParcels(await getParcels(token));setParcelName("");setParcelArea("");setParcelStatus("Parcela guardada correctamente.");}catch(e){setParcelStatus(e instanceof Error?e.message:"Error guardando parcela");}finally{setFormBusy(false);}}
  const data=weather?.data;
  const rain=validValues(data?.PRECTOTCORR).slice(-26);
  const peak=Math.max(1,...rain.map(([,value])=>value));
  const totalArea=parcels.reduce((v,p)=>v+(p.area_ha||0),0);
  return <div className="ag-layout">
   <aside className="ag-sidebar">
-   <Link className="ag-logo" href="/dashboard"><Leaf size={30}/> <span>AGRONEX<small>Inteligencia agrícola espacial</small></span></Link>
-   <div className="ag-nav">{links.map(x=><Link key={x.name} className={x.href==="/dashboard"?"selected":""} href={x.href}><x.icon size={18}/>{x.name}</Link>)}</div>
+   <Link className="ag-logo" href="/dashboard" onClick={()=>setSection("overview")}><Leaf size={30}/> <span>AGRONEX<small>Inteligencia agrícola espacial</small></span></Link>
+   <div className="ag-nav">{links.map(x=><Link key={x.name} className={(section==="parcels"?x.name==="Mis parcelas":x.href==="/dashboard")?"selected":""} href={x.href} onClick={()=>setSection(x.name==="Mis parcelas"?"parcels":"overview")}><x.icon size={18}/>{x.name}</Link>)}</div>
    <div className="ag-side-note"><Leaf size={29}/><h3>Agricultura informada</h3><p>Observaciones de NASA y análisis científico para gestionar el territorio.</p><small>NASA Space Apps · 2026</small></div>
   </aside>
   <div className="ag-workspace">
    <header className="ag-header"><div><span className="ag-kicker">PLATAFORMA DE INTELIGENCIA AGRÍCOLA</span><h1>Panel de control</h1><p>Datos ambientales, parcelas y capacidades analíticas en un solo lugar.</p></div><div className="ag-profile"><ShieldCheck size={18}/><span>{email||"Modo exploración"}</span></div></header>
+   {section==="parcels" ? <section className="ag-parcel-page">
+     <div className="ag-panel-title"><div><h2><MapPin size={22}/> Mis parcelas</h2><p>Administra tus terrenos desde el mismo dashboard AGRONEX.</p></div><button className="ag-action" onClick={()=>setSection("overview")}>Volver al panel</button></div>
+     <div className="ag-content">
+       <article className="ag-panel"><h2>Acceso y registro</h2>{!getSupabase()?<p className="ag-disclaimer">Para activar las parcelas configura NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en Render.</p>:!token?<div className="ag-controls"><label>Correo<input type="email" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)}/></label><label>Contraseña<input type="password" value={loginPassword} onChange={e=>setLoginPassword(e.target.value)}/></label><button className="ag-action" disabled={formBusy} onClick={signIn}>Iniciar sesión</button>{authError&&<p role="alert">{authError}</p>}</div>:<><p>Sesión: {email} <button className="ag-action" onClick={()=>getSupabase()?.auth.signOut()}>Cerrar sesión</button></p><div className="ag-controls"><label>Nombre de parcela<input value={parcelName} maxLength={120} onChange={e=>setParcelName(e.target.value)}/></label><label>Área (ha)<input type="number" min="0.001" step="any" value={parcelArea} onChange={e=>setParcelArea(e.target.value)}/></label><label>Latitud<input type="number" step="any" value={coords.latitude} onChange={e=>setCoords(v=>({...v,latitude:Number(e.target.value)}))}/></label><label>Longitud<input type="number" step="any" value={coords.longitude} onChange={e=>setCoords(v=>({...v,longitude:Number(e.target.value)}))}/></label></div><button className="ag-action" disabled={formBusy||!parcelName.trim()} onClick={saveParcel}>Registrar parcela</button></>}{parcelStatus&&<p role="status">{parcelStatus}</p>}</article>
+       <article className="ag-panel"><h2>Parcelas registradas</h2>{parcels.length?parcels.map(p=><div className="ag-parcel" key={p.id}><MapPin size={20}/><div><b>{p.name}</b><small>{p.latitude.toFixed(4)}, {p.longitude.toFixed(4)} · {p.area_ha||"Área no indicada"} ha</small></div><button className="ag-action" onClick={()=>{setCoords(v=>({...v,latitude:p.latitude,longitude:p.longitude}));setSelectedParcelId(p.id);setSection("overview");}}>Ver en mapa</button></div>):<p className="ag-muted">No hay parcelas disponibles. Inicia sesión y registra un terreno.</p>}</article>
+     </div></section> : <>
    <section className="ag-stats">
     <article><div className="ag-stat-icon"><MapPin/></div><span>Parcelas registradas</span><strong>{parcels.length}</strong><small>{email?"Datos de tu cuenta":"Inicia sesión para consultar"}</small></article>
     <article><div className="ag-stat-icon"><Leaf/></div><span>Superficie registrada</span><strong>{totalArea.toFixed(1)} <em>ha</em></strong><small>Superficie declarada por los usuarios</small></article>
@@ -73,6 +93,7 @@ export default function Dashboard(){
      <article className="ag-panel ag-advice"><h2><ShieldCheck size={20}/> Fuentes verificables</h2><p>NASA POWER suministra estadísticas ambientales. GIBS muestra imágenes de la Tierra. HLS podrá aportar bandas para calcular índices de vegetación.</p><a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">Fuente NASA POWER <ExternalLink size={15}/></a></article>
     </div>
    </section>
+   </>}
    <footer className="ag-footer">AGRONEX · Prototipo de investigación · Los datos de teledetección no sustituyen diagnósticos de campo.</footer>
   </div>
  </div>
