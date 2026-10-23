@@ -5,7 +5,7 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query
 
 router = APIRouter(prefix="/api/satellite", tags=["satellite"])
-STAC = "https://cmr.earthdata.nasa.gov/stac/LPCLOUD/search"
+STAC = "https://cmr.earthdata.nasa.gov/cmr-stac/LPCLOUD/search"
 GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/wmts.cgi"
 
 @router.get("/gibs")
