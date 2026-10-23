@@ -8,9 +8,12 @@ const LAYERS=[
  {id:"MODIS_Terra_CorrectedReflectance_TrueColor",label:"MODIS Terra · Color natural"},
  {id:"MODIS_Aqua_CorrectedReflectance_TrueColor",label:"MODIS Aqua · Color natural"}
 ] as const;
-type Props={latitude?:number;longitude?:number;compact?:boolean};
-export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=false}:Props){
+type ParcelPoint={id:string;name:string;latitude:number;longitude:number;area_ha:number|null};
+type Props={latitude?:number;longitude?:number;compact?:boolean;parcels?:ParcelPoint[];selectedParcelId?:string};
+export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=false,parcels=[],selectedParcelId}:Props){
  const host=useRef<HTMLDivElement>(null);
+ const parcelList=useRef(parcels);
+ parcelList.current=parcels;
  const [date,setDate]=useState("2025-01-15");
  const [layer,setLayer]=useState<string>(LAYERS[0].id);
  const [error,setError]=useState("");
@@ -27,13 +30,20 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
       style:{version:8,sources:{imagery:{type:"raster",tiles:[url],tileSize:256,
       attribution:"Imagery © NASA GIBS / MODIS"}},layers:[{id:"nasa-imagery",source:"imagery",type:"raster"}]}});
     map.addControl(new gl.NavigationControl({showCompass:true}),"top-left");
+    for(const parcel of parcelList.current){
+      if(!Number.isFinite(parcel.latitude)||!Number.isFinite(parcel.longitude))continue;
+      const marker=new gl.Marker({color:parcel.id===selectedParcelId?"#fbbf24":"#2ed276"})
+        .setLngLat([parcel.longitude,parcel.latitude]);
+      const popup=new gl.Popup({offset:22}).setText(parcel.name+(parcel.area_ha? " · "+parcel.area_ha+" ha":""));
+      marker.setPopup(popup).addTo(map);
+    }
     map.addControl(new gl.ScaleControl({maxWidth:120,unit:"metric"}),"bottom-left");
     map.on("error",event=>setError(event.error?.message||"No se pudo cargar la imagen NASA"));
    }catch(e){setError(e instanceof Error?e.message:"Error de mapa")}
   };
   void load();
   return()=>{disposed=true;map?.remove()};
- },[date,layer,latitude,longitude,compact]);
+ },[date,layer,latitude,longitude,compact,selectedParcelId,parcels.length]);
  return <section className="ag-satellite-widget" aria-label="Visor de imágenes satelitales NASA">
   <div className="ag-sat-toolbar">
    <label><CalendarDays size={15}/> Fecha de imagen<input aria-label="Fecha satelital" type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
