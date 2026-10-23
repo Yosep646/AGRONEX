@@ -1,0 +1,51 @@
+"use client";
+import {useEffect,useRef,useState} from "react";
+import Link from "next/link";
+import {CalendarDays,Layers,ExternalLink,Satellite,MapPin} from "lucide-react";
+import "maplibre-gl/dist/maplibre-gl.css";
+
+const LAYERS=[
+ {id:"MODIS_Terra_CorrectedReflectance_TrueColor",label:"MODIS Terra · Color natural"},
+ {id:"MODIS_Aqua_CorrectedReflectance_TrueColor",label:"MODIS Aqua · Color natural"}
+] as const;
+type Props={latitude?:number;longitude?:number;compact?:boolean};
+export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=false}:Props){
+ const host=useRef<HTMLDivElement>(null);
+ const [date,setDate]=useState("2025-01-15");
+ const [layer,setLayer]=useState<string>(LAYERS[0].id);
+ const [error,setError]=useState("");
+ useEffect(()=>{
+  let map:import("maplibre-gl").Map|undefined;
+  let disposed=false;
+  setError("");
+  const load=async()=>{
+   try{
+    const gl=await import("maplibre-gl");
+    if(disposed||!host.current)return;
+    const url=`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
+    map=new gl.Map({container:host.current,center:[longitude,latitude],zoom:compact?7:6,maxZoom:9,
+      style:{version:8,sources:{imagery:{type:"raster",tiles:[url],tileSize:256,
+      attribution:"Imagery © NASA GIBS / MODIS"}},layers:[{id:"nasa-imagery",source:"imagery",type:"raster"}]}});
+    map.addControl(new gl.NavigationControl({showCompass:true}),"top-left");
+    map.addControl(new gl.ScaleControl({maxWidth:120,unit:"metric"}),"bottom-left");
+    map.on("error",event=>setError(event.error?.message||"No se pudo cargar la imagen NASA"));
+   }catch(e){setError(e instanceof Error?e.message:"Error de mapa")}
+  };
+  void load();
+  return()=>{disposed=true;map?.remove()};
+ },[date,layer,latitude,longitude,compact]);
+ return <section className="ag-satellite-widget" aria-label="Visor de imágenes satelitales NASA">
+  <div className="ag-sat-toolbar">
+   <label><CalendarDays size={15}/> Fecha de imagen<input aria-label="Fecha satelital" type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
+   <label><Layers size={15}/> Capa<select aria-label="Capa satelital" value={layer} onChange={e=>setLayer(e.target.value)}>{LAYERS.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}</select></label>
+   <Link href="/satellite" className="ag-sat-expand" title="Abrir visor satelital completo"><ExternalLink size={17}/> <span>Ampliar</span></Link>
+  </div>
+  <div className="ag-sat-map">
+   <div ref={host} className="ag-map-canvas"/>
+   <div className="ag-map-watermark"><Satellite size={15}/> NASA GIBS · MODIS</div>
+   <div className="ag-map-coordinate"><MapPin size={14}/> {latitude.toFixed(3)}, {longitude.toFixed(3)}</div>
+  </div>
+  {error&&<div role="alert" className="ag-alert">{error}. Prueba otra fecha o capa.</div>}
+  <div className="ag-map-bottom"><span>Imágenes de NASA, no NDVI procesado</span><span>Resolución limitada para parcelas pequeñas</span></div>
+ </section>;
+}
