@@ -6,12 +6,12 @@ import {getSupabase} from "../../lib/supabase";
 import SatelliteMap from "../../components/SatelliteMap";
 import {addParcel,getParcels,getWeather,type Parcel,type Weather,API_URL} from "../../lib/api";
 
-const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/dashboard?section=parcels"},{name:"Visión satelital",icon:Satellite,href:"/satellite"},{name:"Clima NASA",icon:CloudSun,href:"/manage"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard#inteligencia"}];
+const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/dashboard?section=parcels"},{name:"Visión satelital",icon:Satellite,href:"/dashboard?section=satellite"},{name:"Clima NASA",icon:CloudSun,href:"/dashboard?section=climate"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard?section=ai"}];
 const initial={latitude:-9.93,longitude:-76.24,start:"2025-01-01",end:"2025-01-31"};
 function validValues(source?:Record<string,number|null>): [string,number][]{return Object.entries(source||{}).filter((entry):entry is [string,number]=>typeof entry[1]==="number"&&Number.isFinite(entry[1])&&entry[1]>-900)}
 function mean(source?:Record<string,number|null>){const a=validValues(source);return a.length?(a.reduce((sum,[,v])=>sum+v,0)/a.length).toFixed(1):"—"}
 export default function Dashboard(){
- const [section,setSection]=useState<"overview"|"parcels">("overview");
+ const [section,setSection]=useState<"overview"|"parcels"|"satellite"|"climate"|"ai">("overview");
  const [loginEmail,setLoginEmail]=useState("");
  const [loginPassword,setLoginPassword]=useState("");
  const [authError,setAuthError]=useState("");
@@ -20,7 +20,7 @@ export default function Dashboard(){
  const [parcelArea,setParcelArea]=useState("");
  const [parcelStatus,setParcelStatus]=useState("");
  const [formBusy,setFormBusy]=useState(false);
- useEffect(()=>{if(new URLSearchParams(window.location.search).get("section")==="parcels")setSection("parcels")},[]);
+ useEffect(()=>{{const value=new URLSearchParams(window.location.search).get("section");if(value==="parcels"||value==="satellite"||value==="climate"||value==="ai")setSection(value)}},[]);
  const [parcels,setParcels]=useState<Parcel[]>([]);
  const [selectedParcelId,setSelectedParcelId]=useState("");
  const [weather,setWeather]=useState<Weather|null>(null);
@@ -52,11 +52,12 @@ export default function Dashboard(){
  return <div className="ag-layout">
   <aside className="ag-sidebar">
    <Link className="ag-logo" href="/dashboard" onClick={()=>setSection("overview")}><Leaf size={30}/> <span>AGRONEX<small>Inteligencia agrícola espacial</small></span></Link>
-   <div className="ag-nav">{links.map(x=><Link key={x.name} className={(section==="parcels"?x.name==="Mis parcelas":x.href==="/dashboard")?"selected":""} href={x.href} onClick={()=>setSection(x.name==="Mis parcelas"?"parcels":"overview")}><x.icon size={18}/>{x.name}</Link>)}</div>
+   <div className="ag-nav">{links.map(x=><Link key={x.name} className={(section==="parcels"?x.name==="Mis parcelas":section==="satellite"?x.name==="Visión satelital":section==="climate"?x.name==="Clima NASA":section==="ai"?x.name==="Análisis e IA":x.href==="/dashboard")?"selected":""} href={x.href} onClick={()=>setSection(x.name==="Mis parcelas"?"parcels":x.name==="Visión satelital"?"satellite":x.name==="Clima NASA"?"climate":x.name==="Análisis e IA"?"ai":"overview")}><x.icon size={18}/>{x.name}</Link>)}</div>
    <div className="ag-side-note"><Leaf size={29}/><h3>Agricultura informada</h3><p>Observaciones de NASA y análisis científico para gestionar el territorio.</p><small>NASA Space Apps · 2026</small></div>
   </aside>
   <div className="ag-workspace">
    <header className="ag-header"><div><span className="ag-kicker">PLATAFORMA DE INTELIGENCIA AGRÍCOLA</span><h1>Panel de control</h1><p>Datos ambientales, parcelas y capacidades analíticas en un solo lugar.</p></div><div className="ag-profile"><ShieldCheck size={18}/><span>{email||"Modo exploración"}</span></div></header>
+   {section==="satellite" ? <section className="ag-panel"><div className="ag-panel-title"><div><h2><Satellite size={22}/> Visión satelital NASA</h2><p>Explora las imágenes GIBS desde el mismo panel de AGRONEX.</p></div><button className="ag-action" onClick={()=>setSection("overview")}>Panel general</button></div><div className="ag-parcel-picker"><label>Parcela</label><select aria-label="Seleccionar parcela" value={selectedParcelId} onChange={e=>{const id=e.target.value;setSelectedParcelId(id);const parcel=parcels.find(p=>p.id===id);if(parcel)setCoords(v=>({...v,latitude:parcel.latitude,longitude:parcel.longitude}));}}><option value="">Ubicación de referencia · Huánuco</option>{parcels.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></div><SatelliteMap latitude={coords.latitude} longitude={coords.longitude} parcels={parcels} selectedParcelId={selectedParcelId}/><p className="ag-muted">Las imágenes NASA disponibles dependen de la fecha. No son una transmisión en vivo ni un mapa NDVI de parcelas.</p></section> : section==="climate" ? <section className="ag-panel"><div className="ag-panel-title"><div><h2><CloudSun size={22}/> Clima NASA POWER</h2><p>Observaciones meteorológicas históricas por coordenadas.</p></div><button className="ag-action" disabled={busy} onClick={refresh}>{busy?"Consultando...":"Consultar NASA"}</button></div><div className="ag-controls"><label>Latitud<input type="number" value={coords.latitude} step="any" onChange={e=>setCoords(v=>({...v,latitude:Number(e.target.value)}))}/></label><label>Longitud<input type="number" value={coords.longitude} step="any" onChange={e=>setCoords(v=>({...v,longitude:Number(e.target.value)}))}/></label><label>Desde<input type="date" value={coords.start} onChange={e=>setCoords(v=>({...v,start:e.target.value}))}/></label><label>Hasta<input type="date" value={coords.end} onChange={e=>setCoords(v=>({...v,end:e.target.value}))}/></label></div>{error&&<p role="alert">{error}</p>}<div className="ag-measures"><div><Sun/><span>Temperatura</span><strong>{mean(weather?.data.T2M)} °C</strong></div><div><Droplets/><span>Precipitación</span><strong>{mean(weather?.data.PRECTOTCORR)} mm/día</strong></div><div><Activity/><span>Radiación</span><strong>{mean(weather?.data.ALLSKY_SFC_SW_DWN)} kWh/m²/día</strong></div></div></section> : section==="ai" ? <section className="ag-panel"><div className="ag-panel-title"><div><h2><BrainCircuit size={22}/> Análisis con IA</h2><p>Estado verificable del entrenamiento e inferencia de modelos.</p></div></div><div className="ag-model-row"><div><b>Random Forest</b><small>Predicción experimental de lluvia</small></div><span className="ag-status">{models?.ml==="trained"?"Entrenado":"Sin pesos entrenados"}</span></div><div className="ag-model-row"><div><b>LSTM · PyTorch</b><small>Series meteorológicas</small></div><span className="ag-status">{models?.dl==="not_deployed"?"No desplegado":models?.dl||"No disponible"}</span></div><p className="ag-disclaimer">No se proporcionan pronósticos ni recomendaciones sin entrenamiento y validación.</p></section> : null}
    {section==="parcels" ? <section className="ag-parcel-page">
      <div className="ag-panel-title"><div><h2><MapPin size={22}/> Mis parcelas</h2><p>Administra tus terrenos desde el mismo dashboard AGRONEX.</p></div><button className="ag-action" onClick={()=>setSection("overview")}>Volver al panel</button></div>
      <div className="ag-content">
@@ -72,7 +73,7 @@ export default function Dashboard(){
    <section className="ag-content">
     <div className="ag-left">
      <article className="ag-panel ag-map">
-      <div className="ag-panel-title"><div><h2><Satellite size={21}/> Visión satelital NASA</h2><p>Imágenes reales MODIS Terra mediante NASA GIBS</p></div><Link className="ag-action" href="/satellite">Explorar mapa <ArrowUpRight size={16}/></Link></div>
+      <div className="ag-panel-title"><div><h2><Satellite size={21}/> Visión satelital NASA</h2><p>Imágenes reales MODIS Terra mediante NASA GIBS</p></div><Link className="ag-action" href="/dashboard?section=satellite" onClick={()=>setSection("satellite")}>Explorar mapa <ArrowUpRight size={16}/></Link></div>
       <div className="ag-parcel-picker"><label htmlFor="ag-parcel-select">Parcela en el mapa</label><select id="ag-parcel-select" value={selectedParcelId} onChange={e=>{const id=e.target.value;setSelectedParcelId(id);const p=parcels.find(x=>x.id===id);if(p)setCoords(v=>({...v,latitude:p.latitude,longitude:p.longitude}));}}><option value="">Ubicación de referencia · Huánuco</option>{parcels.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select><span>{parcels.length? "Selecciona una parcela para centrar el mapa":"Inicia sesión y registra una parcela para mostrar su ubicación"}</span></div>
       <SatelliteMap compact latitude={coords.latitude} longitude={coords.longitude} parcels={parcels} selectedParcelId={selectedParcelId}/>
      </article>
