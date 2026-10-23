@@ -5,6 +5,7 @@ import httpx
 from .config import settings
 from .nasa import fetch_power
 from .parcels import router as parcels_router
+from .satellite import router as satellite_router
 
 app = FastAPI(title="AGRONEX API", version="0.2.0",
               description="Backend AGRONEX: NASA POWER y parcelas con Supabase Auth")
@@ -13,6 +14,7 @@ app.add_middleware(
     allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["*"],
 )
 app.include_router(parcels_router)
+app.include_router(satellite_router)
 
 @app.get("/api/health")
 async def health():
