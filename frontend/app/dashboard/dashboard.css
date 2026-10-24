@@ -32,3 +32,16 @@
 .ag-parcel[role="button"]{cursor:pointer}
 .ag-parcel[role="button"]:hover{background:#f2f9f3}
 .ag-parcel[role="button"]:focus-visible{outline:2px solid #229b60;outline-offset:2px}
+
+/* AGRONEX visual reference enhancements, preserving functionality */
+.ag-topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;background:#fff;border:1px solid #e6ede8;border-radius:14px;padding:9px 14px;margin-bottom:18px}
+.ag-top-search{display:flex;gap:9px;align-items:center;flex:1;max-width:450px;color:#76897e}
+.ag-top-search input{width:100%;border:0;background:transparent;padding:9px 2px;outline-color:#3bab75;font-size:13px}
+.ag-top-actions{display:flex;align-items:center;gap:16px}.ag-top-actions>span{display:flex;align-items:center;gap:7px;color:#516b5a;font-size:12px}.ag-user-avatar{border-radius:50%;background:#147b52;color:white!important;padding:9px 12px;font-weight:800}
+.ag-landscape-hero{border-radius:17px;padding:24px 25px;margin-bottom:17px;min-height:125px;background:linear-gradient(100deg,rgba(246,250,248,.96) 0%,rgba(229,244,232,.87) 52%,rgba(20,94,51,.4) 100%),linear-gradient(125deg,#e6efdf,#9bbd8f 55%,#2e7650);display:flex;flex-direction:column;gap:6px}
+.ag-landscape-hero span{color:#158054;letter-spacing:1.4px;font-size:10px;font-weight:800}
+.ag-landscape-hero strong{color:#12382a;font:700 clamp(21px,2.5vw,31px) Outfit,Arial,sans-serif}
+.ag-landscape-hero small{font-size:12px;color:#42715a}
+.ag-lower-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:17px}.ag-lower-grid .ag-panel{min-width:0}.ag-lower-grid .ag-measures{grid-template-columns:1fr}.ag-lower-grid .ag-measures>div{display:flex;align-items:center;justify-content:space-between}.ag-lower-grid .ag-measures svg{width:18px}.ag-lower-grid .ag-measures strong{font-size:15px}
+.ag-feature-pending{min-height:153px;background:#f4f9f5;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;padding:15px;color:#327957}.ag-feature-pending strong{font-size:13px;color:#214b34}.ag-feature-pending span{font-size:12px;color:#6e8775;line-height:1.4}
+@media(max-width:1150px){.ag-lower-grid{grid-template-columns:1fr 1fr}}@media(max-width:750px){.ag-topbar{flex-wrap:wrap}.ag-lower-grid{grid-template-columns:1fr}.ag-top-search{max-width:none}.ag-top-actions{width:100%;justify-content:space-between}}
