@@ -54,3 +54,13 @@
 .ag-temp-line{background:#f59b22}.ag-rain-line{background:#3187e6}
 .ag-climate-chart>small{font-size:10px;color:#879c8b}
 .ag-lower-grid .ag-panel>.ag-action{margin-top:3px}
+
+.ag-guidance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.ag-guidance-item{display:flex;flex-direction:column;gap:7px;padding:16px;background:#f5faf7;border:1px solid #e1eee5;border-radius:12px}
+.ag-guidance-item svg{color:#1b965f}.ag-guidance-item strong{font-size:12px;color:#456754}
+.ag-guidance-item b{font-size:24px;color:#133d2a}.ag-guidance-item small{font-size:11px;color:#64796d;line-height:1.6}
+.ag-guidance>.ag-muted{margin-top:13px}
+.ag-history{margin-top:16px;border-top:1px solid #e0ede5;padding-top:12px}.ag-history h3{font-size:14px}
+.ag-model-predict-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}
+.ag-model-predict-controls select,.ag-controls select{border:1px solid #d4e3d9;border-radius:9px;padding:10px;background:white}
+@media(max-width:850px){.ag-guidance-grid{grid-template-columns:1fr}}
