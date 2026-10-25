@@ -1,5 +1,6 @@
 """Inferencia basada exclusivamente en artefactos entrenados de AGRONEX."""
 from pathlib import Path
+import json
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from .dl_inference import predict_lstm, WEIGHTS
@@ -59,3 +60,10 @@ def forecast_lstm(data:LSTMHistoryInput):
         raise HTTPException(422,"Datos o versión de modelo incompatibles") from exc
     return {"predicted_precipitation_mm":value,"horizon":"1 day","model":"LSTM",
             "warning":"Predicción experimental, no recomendación de siembra ni pronóstico operativo."}
+
+@router.get("/metrics")
+def metrics():
+    path=ARTIFACT.parent/"metrics.json"
+    if not path.is_file():
+        raise HTTPException(503,"Métricas todavía no publicadas")
+    return json.loads(path.read_text(encoding="utf-8"))
