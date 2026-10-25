@@ -7,6 +7,7 @@ import SatelliteMap from "../../components/SatelliteMap";
 import ClimateChart from "../../components/ClimateChart";
 import EarthdataCatalog from "../../components/EarthdataCatalog";
 import ModelForecast from "../../components/ModelForecast";
+import FarmGuidance from "../../components/FarmGuidance";
 import {addParcel,getParcels,getWeather,type Parcel,type Weather,API_URL} from "../../lib/api";
 
 const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/dashboard?section=parcels"},{name:"Visión satelital",icon:Satellite,href:"/dashboard?section=satellite"},{name:"Clima NASA",icon:CloudSun,href:"/dashboard?section=climate"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard?section=ai"},{name:"Reportes",icon:FileText,href:"/dashboard?section=reports"},{name:"Configuración",icon:Settings,href:"/dashboard?section=settings"}];
@@ -98,6 +99,7 @@ export default function Dashboard(){
      <article className="ag-panel ag-advice"><h2><ShieldCheck size={20}/> Fuentes verificables</h2><p>NASA POWER suministra estadísticas ambientales. GIBS muestra imágenes de la Tierra. HLS podrá aportar bandas para calcular índices de vegetación.</p><a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">Fuente NASA POWER <ExternalLink size={15}/></a></article>
     </div>
    </section>
+   <FarmGuidance weather={weather} parcels={parcels}/>
    <ModelForecast weather={weather} parcels={parcels}/>
    <EarthdataCatalog latitude={coords.latitude} longitude={coords.longitude}/>
    <section className="ag-lower-grid">
