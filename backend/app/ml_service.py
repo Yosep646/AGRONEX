@@ -2,6 +2,7 @@
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from .dl_inference import predict_lstm, WEIGHTS
 import joblib
 import numpy as np
 
@@ -19,7 +20,7 @@ class HistoryInput(BaseModel):
 def status():
     exists = ARTIFACT.exists()
     return {"ml": "trained" if exists else "not_trained",
-            "dl": "not_deployed",
+            "dl": "trained" if WEIGHTS.is_file() else "not_deployed",
             "note": "Solo se publican inferencias tras entrenar y evaluar modelos con datos observados."}
 
 @router.post("/rainfall/forecast")
@@ -42,3 +43,19 @@ def forecast(data: HistoryInput):
     return {"predicted_precipitation_mm": max(0.0, prediction),
             "horizon": "1 day", "model": "RandomForest",
             "warning": "Estimación experimental, no pronóstico operativo ni recomendación agrícola."}
+
+class LSTMHistoryInput(BaseModel):
+    temperature_c: list[float] = Field(min_length=14,max_length=14)
+    precipitation_mm: list[float] = Field(min_length=14,max_length=14)
+    radiation_kwh_m2: list[float] = Field(min_length=14,max_length=14)
+
+@router.post("/rainfall/forecast-lstm")
+def forecast_lstm(data:LSTMHistoryInput):
+    if not WEIGHTS.is_file():
+        raise HTTPException(503,"LSTM sin pesos desplegados")
+    try:
+        value=predict_lstm(data.temperature_c,data.precipitation_mm,data.radiation_kwh_m2)
+    except (ValueError,KeyError) as exc:
+        raise HTTPException(422,"Datos o versión de modelo incompatibles") from exc
+    return {"predicted_precipitation_mm":value,"horizon":"1 day","model":"LSTM",
+            "warning":"Predicción experimental, no recomendación de siembra ni pronóstico operativo."}
