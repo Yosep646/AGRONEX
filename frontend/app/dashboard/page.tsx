@@ -5,6 +5,7 @@ import {Leaf,LayoutDashboard,Satellite,CloudSun,BrainCircuit,MapPin,ShieldCheck,
 import {getSupabase} from "../../lib/supabase";
 import SatelliteMap from "../../components/SatelliteMap";
 import ClimateChart from "../../components/ClimateChart";
+import EarthdataCatalog from "../../components/EarthdataCatalog";
 import {addParcel,getParcels,getWeather,type Parcel,type Weather,API_URL} from "../../lib/api";
 
 const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/dashboard?section=parcels"},{name:"Visión satelital",icon:Satellite,href:"/dashboard?section=satellite"},{name:"Clima NASA",icon:CloudSun,href:"/dashboard?section=climate"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard?section=ai"},{name:"Reportes",icon:FileText,href:"/dashboard?section=reports"},{name:"Configuración",icon:Settings,href:"/dashboard?section=settings"}];
@@ -96,6 +97,7 @@ export default function Dashboard(){
      <article className="ag-panel ag-advice"><h2><ShieldCheck size={20}/> Fuentes verificables</h2><p>NASA POWER suministra estadísticas ambientales. GIBS muestra imágenes de la Tierra. HLS podrá aportar bandas para calcular índices de vegetación.</p><a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">Fuente NASA POWER <ExternalLink size={15}/></a></article>
     </div>
    </section>
+   <EarthdataCatalog latitude={coords.latitude} longitude={coords.longitude}/>
    <section className="ag-lower-grid">
      <article className="ag-panel"><div className="ag-panel-title"><div><h2><TrendingUp size={20}/> Condiciones climáticas NASA</h2><p>Resumen del periodo histórico consultado, no pronóstico</p></div><button className="ag-action" onClick={()=>setSection("climate")}>Explorar</button></div><ClimateChart temperature={weather?.data.T2M} rain={weather?.data.PRECTOTCORR}/><button className="ag-action" onClick={refresh} disabled={busy}>{busy?"Consultando NASA...":"Actualizar datos NASA"}</button>{error&&<p className="ag-alert" role="alert">{error}</p>}</article>
      <article className="ag-panel"><div className="ag-panel-title"><div><h2><Leaf size={20}/> Vegetación (NDVI)</h2><p>Procesamiento de imágenes HLS</p></div></div><div className="ag-feature-pending"><Leaf size={27}/><strong>Pendiente de datos HLS procesados</strong><span>No se mostrará un mapa NDVI ficticio.</span></div></article>
