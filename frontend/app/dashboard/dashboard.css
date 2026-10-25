@@ -146,3 +146,5 @@
 .ag-home-map .ag-sat-toolbar{flex-wrap:wrap}
 .ag-home .ag-home-heading button:hover,.ag-home .ag-home-primary:hover,.ag-home .ag-home-soft:hover{filter:brightness(.96);transform:translateY(-1px)}
 .ag-home .ag-home-heading button:focus-visible,.ag-home .ag-home-primary:focus-visible,.ag-home .ag-home-soft:focus-visible{outline:3px solid #77c69b;outline-offset:2px}
+
+.ag-map-guidance{flex-basis:100%;font-size:13px;line-height:1.5;color:#3f6a50;background:#eff8f0;border:1px solid #d6eada;border-radius:10px;padding:11px 13px;margin:0 0 8px}
