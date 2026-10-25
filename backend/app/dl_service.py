@@ -58,6 +58,16 @@ def train_lstm(csv_path: str, output_path: str, epochs: int = 25):
     torch.save({"state_dict":model.state_dict(),"mean":scaler.mean_.tolist(),
                 "scale":scaler.scale_.tolist(),"sequence_length":length,
                 "features":FEATURES,"mae_test_mm":mae}, output)
+    # Exportación explícita con claves NumPy: el backend infiere sin PyTorch.
+    state=model.state_dict()
+    np.savez_compressed(output.with_suffix(".npz"),
+       sequence_length=np.array(length),mean=scaler.mean_,scale=scaler.scale_,
+       weight_ih=state["lstm.weight_ih_l0"].numpy(),
+       weight_hh=state["lstm.weight_hh_l0"].numpy(),
+       bias_ih=state["lstm.bias_ih_l0"].numpy(),
+       bias_hh=state["lstm.bias_hh_l0"].numpy(),
+       linear_weight=state["out.weight"].numpy(),
+       linear_bias=state["out.bias"].numpy())
     return {"model":"LSTM","mae_test_mm":round(mae,3),"test_samples":len(x_test)}
 
 if __name__=="__main__":
