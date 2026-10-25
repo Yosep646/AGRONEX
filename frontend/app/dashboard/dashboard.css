@@ -64,3 +64,19 @@
 .ag-model-predict-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}
 .ag-model-predict-controls select,.ag-controls select{border:1px solid #d4e3d9;border-radius:9px;padding:10px;background:white}
 @media(max-width:850px){.ag-guidance-grid{grid-template-columns:1fr}}
+
+/* Secciones operativas del dashboard AGRONEX */
+.ag-report .ag-controls,.ag-settings .ag-controls{margin:18px 0;align-items:end;flex-wrap:wrap}
+.ag-health-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.ag-health-grid>div{background:#f2f8f4;border:1px solid #dfebe2;border-radius:14px;padding:19px;display:flex;flex-direction:column;gap:8px}
+.ag-health-grid b{font-size:12px;color:#51816a}
+.ag-health-grid strong{font-size:17px;color:#164632;overflow-wrap:anywhere}
+.ag-health-grid small{color:#647e70;line-height:1.55}
+.ag-report>.ag-climate-chart{max-width:820px}
+.ag-workspace{padding-top:18px}
+.ag-topbar{margin-bottom:16px}
+.ag-header{margin-bottom:19px}
+.ag-nav a.selected{background:#196a4b;box-shadow:inset 3px 0 #a5ebb6}
+.ag-panel{transition:box-shadow .18s ease}
+.ag-panel:hover{box-shadow:0 9px 25px rgba(23,76,47,.055)}
+@media(max-width:850px){.ag-health-grid{grid-template-columns:1fr}}
