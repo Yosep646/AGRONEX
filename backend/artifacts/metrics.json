@@ -1,0 +1,15 @@
+{
+  "source": "NASA POWER (CSV descargado en la ejecuci\u00f3n)",
+  "target": "precipitation_mm, un d\u00eda futuro",
+  "validation": "divisi\u00f3n cronol\u00f3gica de aproximadamente 80/20",
+  "random_forest": {
+    "mae_ml_mm": 1.5686420753976387,
+    "mae_baseline_mm": 1.5739625580604963,
+    "samples_train": 1455,
+    "samples_test": 364
+  },
+  "lstm": {
+    "mae_test_mm": 1.4051563739776611
+  },
+  "disclaimer": "Estimaciones experimentales; requieren comparaci\u00f3n con l\u00ednea base e inspecci\u00f3n de sesgos."
+}
