@@ -98,7 +98,7 @@ export default function Dashboard(){
      <article className="ag-panel ag-advice"><h2><ShieldCheck size={20}/> Fuentes verificables</h2><p>NASA POWER suministra estadísticas ambientales. GIBS muestra imágenes de la Tierra. HLS podrá aportar bandas para calcular índices de vegetación.</p><a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">Fuente NASA POWER <ExternalLink size={15}/></a></article>
     </div>
    </section>
-   <ModelForecast weather={weather}/>
+   <ModelForecast weather={weather} parcels={parcels}/>
    <EarthdataCatalog latitude={coords.latitude} longitude={coords.longitude}/>
    <section className="ag-lower-grid">
      <article className="ag-panel"><div className="ag-panel-title"><div><h2><TrendingUp size={20}/> Condiciones climáticas NASA</h2><p>Resumen del periodo histórico consultado, no pronóstico</p></div><button className="ag-action" onClick={()=>setSection("climate")}>Explorar</button></div><ClimateChart temperature={weather?.data.T2M} rain={weather?.data.PRECTOTCORR}/><button className="ag-action" onClick={refresh} disabled={busy}>{busy?"Consultando NASA...":"Actualizar datos NASA"}</button>{error&&<p className="ag-alert" role="alert">{error}</p>}</article>
