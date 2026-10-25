@@ -19,6 +19,8 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
  const [error,setError]=useState("");
  const [base,setBase]=useState<"satellite"|"nasa"|"street">("satellite");
  const [picked,setPicked]=useState<{lat:number;lon:number}|null>(null);
+ const [autoRecent,setAutoRecent]=useState(true);
+ const [lastChecked,setLastChecked]=useState<string>("");
  const [drawing,setDrawing]=useState(false);
  const [vertices,setVertices]=useState<number[][]>([]);
  const [outline,setOutline]=useState<number[][]>([]);
@@ -26,6 +28,13 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
  const [previousDate,setPreviousDate]=useState("2025-01-15");
  const [blend,setBlend]=useState(50);
  const key="agronex_boundary_"+(selectedParcelId||"reference");
+ useEffect(()=>{
+   if(!autoRecent)return;
+   const update=()=>{const d=new Date();d.setUTCDate(d.getUTCDate()-1);setDate(d.toISOString().slice(0,10));setLastChecked(new Date().toLocaleString("es-PE"));};
+   update();
+   const timer=setInterval(update,60*60*1000);
+   return()=>clearInterval(timer);
+ },[autoRecent]);
  useEffect(()=>{try{const stored=JSON.parse(localStorage.getItem(key)||"[]");setOutline(Array.isArray(stored)?stored:[])}catch{setOutline([])}setVertices([]);setDrawing(false)},[key]);
  useEffect(()=>{
   let map:import("maplibre-gl").Map|undefined;
@@ -70,7 +79,8 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
  return <section className="ag-satellite-widget" aria-label="Visor de imágenes satelitales NASA">
   <div className="ag-sat-toolbar">
    <label><Layers size={15}/> Tipo de mapa<select aria-label="Tipo de mapa" value={base} onChange={e=>{setBase(e.target.value as "satellite"|"nasa"|"street");setError("");}}><option value="satellite">Vista satelital detallada (Esri)</option><option value="nasa">NASA MODIS · imágenes por fecha</option><option value="street">Calles y caminos (OpenStreetMap)</option></select></label>
-   {base==="nasa"&&<label><CalendarDays size={15}/> Fecha de imagen<input aria-label="Fecha satelital" type="date" max={new Date().toISOString().slice(0,10)} value={date} onChange={e=>setDate(e.target.value)}/></label>}
+   {base==="nasa"&&<label><input type="checkbox" checked={autoRecent} onChange={e=>setAutoRecent(e.target.checked)}/> Actualización automática</label>}
+   {base==="nasa"&&<label><CalendarDays size={15}/> Fecha solicitada<input aria-label="Fecha satelital" type="date" disabled={autoRecent} max={new Date().toISOString().slice(0,10)} value={date} onChange={e=>setDate(e.target.value)}/></label>}
    {base==="nasa"&&<label><Layers size={15}/> Capa<select aria-label="Capa satelital" value={layer} onChange={e=>setLayer(e.target.value)}>{LAYERS.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}</select></label>}
    {base==="nasa"&&<button type="button" className="ag-action" onClick={()=>setCompare(v=>!v)}>{compare?"Cerrar comparación":"Comparar dos fechas"}</button>}
    {base==="nasa"&&compare&&<label>Fecha anterior<input type="date" value={previousDate} onChange={e=>setPreviousDate(e.target.value)}/></label>}
@@ -87,6 +97,7 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
   </div>
   {picked&&!drawing&&<div className="ag-map-picked"><MapPin size={16}/> Punto marcado: {picked.lat.toFixed(5)}, {picked.lon.toFixed(5)}. {parcels.length?"Selecciona el marcador de una parcela para abrir sus datos.":"Puedes usar estas coordenadas al registrar tu parcela."}<button type="button" className="ag-action" onClick={()=>{void navigator.clipboard?.writeText(picked.lat.toFixed(6)+", "+picked.lon.toFixed(6))}}>Copiar coordenadas</button></div>}
   {error&&<div role="status" className="ag-alert">{error} <button type="button" onClick={()=>{setBase("satellite");setError("");}}>Abrir mapa satelital</button></div>}
-  <div className="ag-map-bottom"><span>{base==="nasa"?"NASA MODIS · imagen por fecha, resolución limitada":base==="satellite"?"Imagen de fondo Esri: su fecha de captura no es necesariamente actual":"Calles y caminos · OpenStreetMap"}</span><span>{base==="nasa"?"Nubes y resolución pueden dificultar la vista":"Pulsa sobre el mapa para marcar un punto o selecciona una parcela"}</span></div>
+  {base==="nasa"&&<div className="ag-map-picked">NASA: se solicita la imagen del {date}. {lastChecked&&"Última comprobación local: "+lastChecked+". "}Los mosaicos pueden publicarse después de su observación y contener nubes; esta fecha no certifica una imagen disponible.</div>}
+  <div className="ag-map-bottom"><span>{base==="nasa"?"NASA MODIS · imagen por fecha, resolución limitada":base==="satellite"?"Fotografía satelital de referencia: no es una señal en vivo":"Calles y caminos · OpenStreetMap"}</span><span>{base==="nasa"?"Nubes y resolución pueden dificultar la vista":"Pulsa sobre el mapa para marcar un punto o selecciona una parcela"}</span></div>
  </section>;
 }
