@@ -17,7 +17,7 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
  const [date,setDate]=useState(()=>{const d=new Date();d.setUTCDate(d.getUTCDate()-5);return d.toISOString().slice(0,10)});
  const [layer,setLayer]=useState<string>(LAYERS[0].id);
  const [error,setError]=useState("");
- const [base,setBase]=useState<"nasa"|"street">("nasa");
+ const [base,setBase]=useState<"nasa"|"street">("street");
  useEffect(()=>{
   let map:import("maplibre-gl").Map|undefined;
   let disposed=false;
@@ -28,7 +28,7 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
     if(disposed||!host.current)return;
     const url=`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
     const osm="https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-    map=new gl.Map({container:host.current,center:[longitude,latitude],zoom:compact?8:7,maxZoom:16,
+    map=new gl.Map({container:host.current,center:[longitude,latitude],zoom:compact?11:12,maxZoom:18,
       style:{version:8,sources:{imagery:{type:"raster",tiles:[url],tileSize:256,maxzoom:9,
       attribution:"Imagery © NASA GIBS / MODIS"},streets:{type:"raster",tiles:[osm],tileSize:256,maxzoom:19,attribution:"© OpenStreetMap contributors"}},layers:[{id:"street-base",source:"streets",type:"raster",layout:{visibility:base==="street"?"visible":"none"}},{id:"nasa-imagery",source:"imagery",type:"raster",layout:{visibility:base==="nasa"?"visible":"none"}}]}});
     map.addControl(new gl.NavigationControl({showCompass:true}),"top-left");
@@ -47,7 +47,7 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
   return()=>{disposed=true;map?.remove()};
  },[date,layer,base,latitude,longitude,compact,selectedParcelId,parcels.length]);
  return <section className="ag-satellite-widget" aria-label="Visor de imágenes satelitales NASA">
-  <div className="ag-sat-toolbar">
+  <div className="ag-sat-toolbar"><p className="ag-map-guidance">Para encontrar tu terreno, comienza con el mapa de caminos. Las imágenes NASA MODIS pueden tener nubes y no muestran detalles de parcelas pequeñas.</p>
    <label><Layers size={15}/> Tipo de mapa<select aria-label="Tipo de mapa" value={base} onChange={e=>{setBase(e.target.value as "nasa"|"street");setError("");}}><option value="nasa">Imagen NASA</option><option value="street">Calles y caminos (OpenStreetMap)</option></select></label>
    {base==="nasa"&&<label><CalendarDays size={15}/> Fecha de imagen<input aria-label="Fecha satelital" type="date" max={new Date().toISOString().slice(0,10)} value={date} onChange={e=>setDate(e.target.value)}/></label>}
    {base==="nasa"&&<label><Layers size={15}/> Capa<select aria-label="Capa satelital" value={layer} onChange={e=>setLayer(e.target.value)}>{LAYERS.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}</select></label>}
