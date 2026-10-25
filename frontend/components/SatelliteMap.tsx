@@ -27,6 +27,7 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
  const [compare,setCompare]=useState(false);
  const [previousDate,setPreviousDate]=useState("2025-01-15");
  const [blend,setBlend]=useState(50);
+ const [showLabels,setShowLabels]=useState(true);
  const key="agronex_boundary_"+(selectedParcelId||"reference");
  useEffect(()=>{
    if(!autoRecent)return;
@@ -47,10 +48,11 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
     const url=`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
     const osm="https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     const aerial="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+    const places="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}";
     const older=`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${previousDate}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
     map=new gl.Map({container:host.current,center:[longitude,latitude],zoom:compact?11:12,maxZoom:18,
       style:{version:8,sources:{imagery:{type:"raster",tiles:[url],tileSize:256,maxzoom:9,
-      attribution:"Imagery © NASA GIBS / MODIS"},older:{type:"raster",tiles:[older],tileSize:256,maxzoom:9},streets:{type:"raster",tiles:[osm],tileSize:256,maxzoom:19,attribution:"© OpenStreetMap contributors"},aerial:{type:"raster",tiles:[aerial],tileSize:256,maxzoom:19,attribution:"Imagery © Esri, Maxar, Earthstar Geographics, GIS User Community"}},layers:[{id:"aerial-base",source:"aerial",type:"raster",layout:{visibility:base==="satellite"?"visible":"none"}},{id:"street-base",source:"streets",type:"raster",layout:{visibility:base==="street"?"visible":"none"}},{id:"nasa-imagery",source:"imagery",type:"raster",layout:{visibility:base==="nasa"?"visible":"none"}},{id:"nasa-previous",source:"older",type:"raster",layout:{visibility:base==="nasa"&&compare?"visible":"none"},paint:{"raster-opacity":compare?blend/100:0}}]}});
+      attribution:"Imagery © NASA GIBS / MODIS"},older:{type:"raster",tiles:[older],tileSize:256,maxzoom:9},streets:{type:"raster",tiles:[osm],tileSize:256,maxzoom:19,attribution:"© OpenStreetMap contributors"},aerial:{type:"raster",tiles:[aerial],tileSize:256,maxzoom:19,attribution:"Imagery © Esri, Maxar, Earthstar Geographics, GIS User Community"},places:{type:"raster",tiles:[places],tileSize:256,maxzoom:19,attribution:"Place names © Esri, HERE, Garmin, GIS User Community"}},layers:[{id:"aerial-base",source:"aerial",type:"raster",layout:{visibility:base==="satellite"?"visible":"none"}},{id:"street-base",source:"streets",type:"raster",layout:{visibility:base==="street"?"visible":"none"}},{id:"nasa-imagery",source:"imagery",type:"raster",layout:{visibility:base==="nasa"?"visible":"none"}},{id:"nasa-previous",source:"older",type:"raster",layout:{visibility:base==="nasa"&&compare?"visible":"none"},paint:{"raster-opacity":compare?blend/100:0}},{id:"place-labels",source:"places",type:"raster",layout:{visibility:showLabels&&base!=="street"?"visible":"none"}}]}});
     map.on("load",()=>{
       const path=vertices.length?vertices:outline;
       const polygon=path.length>=3?{type:"FeatureCollection" as const,features:[{type:"Feature" as const,properties:{},geometry:{type:"Polygon" as const,coordinates:[[...path,path[0]]]}}]}:{type:"FeatureCollection" as const,features:[]};
@@ -75,10 +77,11 @@ export default function SatelliteMap({latitude=-9.93,longitude=-76.24,compact=fa
   };
   void load();
   return()=>{disposed=true;map?.remove()};
- },[date,layer,base,latitude,longitude,compact,selectedParcelId,parcels.length,onSelectParcel,vertices,drawing,outline,compare,previousDate,blend]);
+ },[date,layer,base,latitude,longitude,compact,selectedParcelId,parcels.length,onSelectParcel,vertices,drawing,outline,compare,previousDate,blend,showLabels]);
  return <section className="ag-satellite-widget" aria-label="Visor de imágenes satelitales NASA">
   <div className="ag-sat-toolbar">
    <label><Layers size={15}/> Tipo de mapa<select aria-label="Tipo de mapa" value={base} onChange={e=>{setBase(e.target.value as "satellite"|"nasa"|"street");setError("");}}><option value="satellite">Vista satelital detallada (Esri)</option><option value="nasa">NASA MODIS · imágenes por fecha</option><option value="street">Calles y caminos (OpenStreetMap)</option></select></label>
+   {base!=="street"&&<label className="ag-label-toggle"><input type="checkbox" checked={showLabels} onChange={e=>setShowLabels(e.target.checked)}/> Mostrar nombres de lugares</label>}
    {base==="nasa"&&<label><input type="checkbox" checked={autoRecent} onChange={e=>setAutoRecent(e.target.checked)}/> Actualización automática</label>}
    {base==="nasa"&&<label><CalendarDays size={15}/> Fecha solicitada<input aria-label="Fecha satelital" type="date" disabled={autoRecent} max={new Date().toISOString().slice(0,10)} value={date} onChange={e=>setDate(e.target.value)}/></label>}
    {base==="nasa"&&<label><Layers size={15}/> Capa<select aria-label="Capa satelital" value={layer} onChange={e=>setLayer(e.target.value)}>{LAYERS.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}</select></label>}
