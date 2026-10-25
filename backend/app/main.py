@@ -9,6 +9,7 @@ from .satellite import router as satellite_router
 from .ml_service import router as models_router
 from .earthdata import router as earthdata_router
 from .vegetation import router as vegetation_router
+from .analysis import router as analysis_router
 
 app = FastAPI(title="AGRONEX API", version="0.2.0",
               description="Backend AGRONEX: NASA POWER y parcelas con Supabase Auth")
@@ -21,6 +22,7 @@ app.include_router(satellite_router)
 app.include_router(models_router)
 app.include_router(earthdata_router)
 app.include_router(vegetation_router)
+app.include_router(analysis_router)
 
 @app.get("/api/health")
 async def health():
