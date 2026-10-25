@@ -139,3 +139,10 @@
 @media(max-width:1300px){.ag-home-main{grid-template-columns:1fr}.ag-home-bottom{grid-template-columns:1fr 1fr}.ag-home-side{display:grid;grid-template-columns:1fr 1fr}}
 @media(max-width:950px){.ag-home-side,.ag-home-bottom{grid-template-columns:1fr}.ag-home-weather>div{min-height:160px}.ag-home-farm-select{flex-wrap:wrap}.ag-farm-count{width:100%}}
 @media(max-width:720px){.ag-layout{grid-template-columns:1fr}.ag-sidebar{position:relative;height:auto;min-height:0;gap:12px}.ag-nav{display:flex;overflow-x:auto}.ag-nav a{white-space:nowrap;padding:10px}.ag-side-note{display:none}.ag-home-hero{padding:24px 22px;min-height:205px}.ag-hero-note{display:none}.ag-home-weather{grid-template-columns:1fr}.ag-home-weather>div{min-height:115px}.ag-home-farm-select select{max-width:100%}}
+
+.ag-home-map .ag-satellite-widget{display:flex;flex-direction:column;flex:1;min-height:400px}
+.ag-home-map .ag-sat-map{flex:1;min-height:350px}
+.ag-home-map .ag-map-canvas{height:100%;min-height:350px}
+.ag-home-map .ag-sat-toolbar{flex-wrap:wrap}
+.ag-home .ag-home-heading button:hover,.ag-home .ag-home-primary:hover,.ag-home .ag-home-soft:hover{filter:brightness(.96);transform:translateY(-1px)}
+.ag-home .ag-home-heading button:focus-visible,.ag-home .ag-home-primary:focus-visible,.ag-home .ag-home-soft:focus-visible{outline:3px solid #77c69b;outline-offset:2px}
