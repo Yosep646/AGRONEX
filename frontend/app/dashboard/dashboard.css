@@ -148,3 +148,17 @@
 .ag-home .ag-home-heading button:focus-visible,.ag-home .ag-home-primary:focus-visible,.ag-home .ag-home-soft:focus-visible{outline:3px solid #77c69b;outline-offset:2px}
 
 .ag-map-guidance{flex-basis:100%;font-size:13px;line-height:1.5;color:#3f6a50;background:#eff8f0;border:1px solid #d6eada;border-radius:10px;padding:11px 13px;margin:0 0 8px}
+
+/* Resultados automáticos legibles para agricultores */
+.ag-easy-analysis{display:flex;flex-direction:column;gap:15px}
+.ag-easy-analysis .ag-controls{margin:0}
+.ag-easy-result{border-radius:16px;padding:22px;background:linear-gradient(125deg,#eff9f1,#f8fcf7);border:1px solid #d5ead9}
+.ag-easy-result-head{display:flex;align-items:center;gap:15px;color:#216e42}
+.ag-easy-result-head>svg{flex:none}
+.ag-easy-result-head span{display:block;color:#5c7964;font-size:13px}
+.ag-easy-result-head strong{display:block;font-size:clamp(20px,2.5vw,29px);color:#194e30;margin:5px 0}
+.ag-easy-result p{font-size:15px;line-height:1.65;color:#355d42}
+.ag-easy-facts{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}
+.ag-easy-facts span{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #dbeadf;border-radius:9px;padding:10px;font-size:12px}
+.ag-easy-empty{background:#f3f9f5;border:1px dashed #c9e4d1;border-radius:14px;padding:25px;display:flex;align-items:center;flex-direction:column;gap:9px;text-align:center}
+.ag-easy-empty strong{font-size:17px;color:#1b5635}.ag-easy-empty p{margin:0;font-size:14px;color:#597866}.ag-easy-empty a{color:#187446;font-weight:700}
