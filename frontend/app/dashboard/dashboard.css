@@ -102,3 +102,40 @@
 .ag-action{min-height:41px}
 @media(max-width:920px){.ag-friendly-results{grid-template-columns:1fr}.ag-simple-form{grid-template-columns:1fr}}
 @media(max-width:600px){.ag-current-parcel label{flex-direction:column;align-items:flex-start}.ag-current-parcel select{max-width:100%}}
+
+/* AGRONEX 2026 - interfaz nueva inspirada en paisaje rural */
+.ag-layout{grid-template-columns:264px minmax(0,1fr);background:#f5f7f6;color:#173026}
+.ag-sidebar{position:sticky;top:0;height:100vh;min-height:0;overflow:auto;background:linear-gradient(170deg,#fff 0%,#fafffb 73%,#e6f2e5 100%);color:#273c4a;padding:25px 15px;gap:28px;border-right:1px solid #e5ece8}
+.ag-logo{color:#163a2b;font-size:26px}.ag-logo svg{color:#2e944d}.ag-logo small{color:#748b78}
+.ag-nav a{color:#364956;font-size:15px;font-weight:600}.ag-nav a:hover{background:#edf4ed;color:#155836}.ag-nav a.selected{background:linear-gradient(105deg,#2e7e48,#276f40);color:white;box-shadow:none;border-radius:12px}
+.ag-side-note{background:linear-gradient(145deg,#e1f1e7,#e9e8c9);border-color:#d5e8d3;color:#244736;margin-top:auto}.ag-side-note svg,.ag-side-note h3{color:#287c4d}.ag-side-note p,.ag-side-note small{color:#365748}
+.ag-workspace-home{padding:0 17px 20px;max-width:1800px}
+.ag-workspace-home .ag-topbar{margin:0 -17px;border-radius:0;background:#fff;padding:13px 18px;border:0;border-bottom:1px solid #e5eee7}
+.ag-home{padding-bottom:15px}.ag-home button{cursor:pointer}
+.ag-home-hero{margin:0 -17px;min-height:198px;padding:30px 35px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:20px;background:linear-gradient(90deg,rgba(14,50,29,.85),rgba(39,73,41,.43),rgba(38,67,40,.27)),url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80") center 53%/cover}
+.ag-home-hero span{font-size:11px;letter-spacing:2px;font-weight:800;color:#e6f4d3}.ag-home-hero h1{font:800 clamp(28px,3vw,40px) Outfit,Arial,sans-serif;margin:8px 0 4px}.ag-home-hero p{font-size:clamp(17px,1.7vw,22px);margin:0;font-weight:600}
+.ag-hero-note{max-width:300px;display:flex;align-items:center;gap:13px;color:#163a27;background:#ffffffed;padding:20px;border-radius:16px;box-shadow:0 9px 28px #0d322336}.ag-hero-note svg{color:#32894a;flex:none}.ag-hero-note span{font-size:13px;letter-spacing:0;line-height:1.5;color:#1d382a}
+.ag-home-farm-select{position:relative;margin:-25px 0 14px;border-radius:17px;background:white;box-shadow:0 6px 25px #153b2114;display:flex;gap:17px;align-items:center;padding:13px 15px;min-height:104px;border:1px solid #e7eee9}
+.ag-farm-thumbnail{width:78px;height:73px;flex:none;border-radius:12px;background:linear-gradient(135deg,#a4d784,#1a7952);display:grid;place-items:center;color:white}
+.ag-farm-head{flex:1;min-width:0}.ag-farm-head small{color:#71897b;font-size:12px}.ag-farm-head h2{margin:3px 0;font-size:23px;color:#152d25}.ag-farm-head p{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12px;color:#6c8277;margin:0}
+.ag-home-farm-select select{max-width:180px;padding:12px 10px;background:#edf3ef;border:1px solid #e0eae2;border-radius:10px;font-weight:700;color:#244936}
+.ag-farm-count{border:0;background:#ecf5ef;text-align:left;min-width:200px;display:grid;grid-template-columns:1fr auto;gap:4px;padding:17px;border-radius:13px;color:#234b33}.ag-farm-count strong{font-size:13px}.ag-farm-count small{grid-column:1;font-size:11px}.ag-farm-count svg{grid-column:2;grid-row:1/3;align-self:center}
+.ag-home-main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.14fr);gap:12px}
+.ag-home-panel{background:white;border:1px solid #e5ede7;border-radius:15px;padding:14px;box-shadow:0 4px 17px #1f46220b;min-width:0}
+.ag-home-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:9px;margin-bottom:12px}.ag-home-heading h2{display:flex;align-items:center;gap:8px;margin:0 0 3px;color:#152b25;font-size:17px;font-weight:800}.ag-home-heading p{color:#83938b;font-size:12px;margin:0}
+.ag-home-heading button{display:inline-flex;align-items:center;gap:5px;border:0;background:#f2f7f2;border-radius:9px;padding:9px 11px;font-size:12px;font-weight:700;color:#267044;white-space:nowrap}
+.ag-home-map{display:flex;flex-direction:column}.ag-home-map .ag-satellite{flex:1;min-height:360px}.ag-home-map .ag-map-container{min-height:350px}.ag-map-disclaimer{font-size:11px;color:#829389;margin-top:8px}
+.ag-home-side{display:flex;flex-direction:column;gap:12px}.ag-home-side>.ag-home-panel{flex:1}
+.ag-home-weather{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ag-home-weather>div{border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:9px;min-height:220px}
+.ag-home-weather strong{font-size:13px}.ag-home-weather b{font-size:clamp(17px,2.2vw,25px)}.ag-home-weather span{font-size:12px;line-height:1.6}
+.ag-weather-blue{background:#f0f7ff;border:1px solid #dbeafb;color:#174e95}.ag-weather-orange{background:#fff7ee;border:1px solid #f8e6d2;color:#8b471a}.ag-weather-green{background:#eef8f1;border:1px solid #dbeee0;color:#225c3a}
+.ag-home-advice{background:#f8fcf8}.ag-home-mini-badge{background:#d9f3e1;color:#268149;padding:6px 9px;border-radius:9px;font-size:11px;font-weight:800}
+.ag-home-advice-content{display:flex;align-items:center;gap:14px;padding:14px;background:#fff;border-radius:12px}.ag-advice-leaf{background:#e0f2e3;border-radius:12px;padding:12px;color:#287748}.ag-home-advice-content strong{font-size:14px}.ag-home-advice-content p{color:#668176;font-size:13px;line-height:1.55;margin:7px 0 0}
+.ag-home-primary,.ag-home-soft{border:0;background:linear-gradient(90deg,#1e8850,#166b42);border-radius:10px;padding:12px 15px;color:#fff;display:flex;gap:8px;align-items:center;justify-content:center;font-size:13px;font-weight:750}.ag-home-advice .ag-home-primary{margin:12px 0 0 auto}
+.ag-home-bottom{display:grid;grid-template-columns:1.24fr .74fr .95fr;gap:12px;margin-top:12px}.ag-home-parcel-list{display:flex;gap:9px;flex-wrap:wrap}
+.ag-home-parcel-list>button{flex:1;min-width:145px;text-align:left;padding:12px;border:1px solid #e1e8e2;background:#fff;border-radius:11px;display:flex;flex-direction:column;gap:5px}.ag-home-parcel-list>button.active{border-color:#2b9153;background:#f3fbf4}.ag-home-parcel-list>button svg{color:#279158}.ag-home-parcel-list>button b{font-size:13px}.ag-home-parcel-list>button small{font-size:11px;color:#718b7b}
+.ag-home-help,.ag-home-notices p{font-size:12px;line-height:1.55;color:#5b7367}.ag-home-notices p{border-radius:9px;background:#f4f8f5;padding:9px;margin:6px 0}.ag-home-soft{background:#eaf4ef;color:#246740;width:100%;margin-top:14px}
+.ag-home-empty{font-size:13px}.ag-home-footer{display:flex;align-items:center;gap:7px;font-size:11px;color:#80958a;margin:12px 3px}
+@media(max-width:1300px){.ag-home-main{grid-template-columns:1fr}.ag-home-bottom{grid-template-columns:1fr 1fr}.ag-home-side{display:grid;grid-template-columns:1fr 1fr}}
+@media(max-width:950px){.ag-home-side,.ag-home-bottom{grid-template-columns:1fr}.ag-home-weather>div{min-height:160px}.ag-home-farm-select{flex-wrap:wrap}.ag-farm-count{width:100%}}
+@media(max-width:720px){.ag-layout{grid-template-columns:1fr}.ag-sidebar{position:relative;height:auto;min-height:0;gap:12px}.ag-nav{display:flex;overflow-x:auto}.ag-nav a{white-space:nowrap;padding:10px}.ag-side-note{display:none}.ag-home-hero{padding:24px 22px;min-height:205px}.ag-hero-note{display:none}.ag-home-weather{grid-template-columns:1fr}.ag-home-weather>div{min-height:115px}.ag-home-farm-select select{max-width:100%}}
