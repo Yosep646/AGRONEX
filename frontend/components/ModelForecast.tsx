@@ -1,71 +1,40 @@
 "use client";
 import {useEffect,useState} from "react";
-import {BrainCircuit,RefreshCw} from "lucide-react";
+import {CloudRain,RefreshCw,Leaf,CalendarDays,MapPin} from "lucide-react";
+import {analyzeNewParcel,readLocalAnalysis,type ParcelAnalysis} from "../lib/parcelAnalysis";
 import {getSupabase} from "../lib/supabase";
-import {readLocalAnalysis,type ParcelAnalysis} from "../lib/parcelAnalysis";
-import {API_URL,type Weather,type Parcel} from "../lib/api";
-type State={ml:string;dl:string};
-type Output={predicted_precipitation_mm:number;model:string;warning:string};
-const names=[["T2M","temperature_c"],["PRECTOTCORR","precipitation_mm"],["ALLSKY_SFC_SW_DWN","radiation_kwh_m2"]] as const;
-export default function ModelForecast({weather,parcels}:{weather:Weather|null;parcels:Parcel[]}){
- const [status,setStatus]=useState<State|null>(null);
- const [model,setModel]=useState<"ml"|"dl">("ml");
+import type {Weather,Parcel} from "../lib/api";
+
+export default function ModelForecast({weather,parcels,selectedParcelId}:{weather:Weather|null;parcels:Parcel[];selectedParcelId?:string}){
+ const [selected,setSelected]=useState("");
+ const [records,setRecords]=useState<ParcelAnalysis[]>([]);
  const [busy,setBusy]=useState(false);
- const [parcelId,setParcelId]=useState("");
- const [history,setHistory]=useState<Array<{id:string;model_name:string;created_at:string;result:{predicted_precipitation_mm?:number}}>>([]);
- const [saveNote,setSaveNote]=useState("");
- const [automatic,setAutomatic]=useState<ParcelAnalysis[]>([]);
- const [result,setResult]=useState<Output|null>(null);
- const [error,setError]=useState("");
- const [metrics,setMetrics]=useState<Record<string,unknown>|null>(null);
- useEffect(()=>{const update=()=>setAutomatic(readLocalAnalysis());update();window.addEventListener("agronex:analysis",update);window.addEventListener("storage",update);return()=>{window.removeEventListener("agronex:analysis",update);window.removeEventListener("storage",update);}},[]);
- useEffect(()=>{fetch(API_URL+"/api/models/status").then(r=>r.json()).then(setStatus).catch(()=>setStatus(null));fetch(API_URL+"/api/models/metrics").then(r=>r.ok?r.json():null).then(setMetrics).catch(()=>setMetrics(null));},[]);
- async function loadHistory(id:string){
-  setParcelId(id);setHistory([]);if(!id)return;
-  const token=(await getSupabase()?.auth.getSession())?.data.session?.access_token;
-  if(!token)return;
-  const r=await fetch(API_URL+"/api/analysis/"+id,{headers:{Authorization:"Bearer "+token}});
-  if(r.ok)setHistory(await r.json());
- }
- async function predict(){
-  setError("");setResult(null);setSaveNote("");setBusy(true);
+ const [message,setMessage]=useState("");
+ const current=selectedParcelId&&parcels.some(p=>p.id===selectedParcelId)?selectedParcelId:selected||parcels[0]?.id||"";
+ const parcel=parcels.find(p=>p.id===current);
+ const record=records.find(a=>a.parcelId===current);
+ useEffect(()=>{const sync=()=>setRecords(readLocalAnalysis());sync();window.addEventListener("agronex:analysis",sync);window.addEventListener("storage",sync);return()=>{window.removeEventListener("agronex:analysis",sync);window.removeEventListener("storage",sync)}},[]);
+ async function update(){
+  if(!parcel)return;
+  setBusy(true);setMessage("Consultando los datos de tu terreno...");
   try{
-   if(!weather)throw new Error("Primero consulta NASA POWER en el panel de clima.");
-   const days=Object.keys(weather.data.T2M||{}).sort().filter(d=>names.every(([key])=>typeof weather.data[key]?.[d]==="number"&&Number(weather.data[key][d])>-900));
-   const required=model==="dl"?14:7;
-   if(days.length<required)throw new Error("Se necesitan "+required+" días de datos válidos.");
-   const last=days.slice(-required);
-   const params:Record<string,number[]|number>={};
-   for(const [field,key] of names)params[key]=last.map(day=>Number(weather.data[field][day]));
-   if(model==="ml"){
-     const date=new Date(last[last.length-1]+"T12:00:00Z");date.setUTCDate(date.getUTCDate()+1);
-     params.day_of_year=Math.floor((date.getTime()-Date.UTC(date.getUTCFullYear(),0,0))/86400000);
-   }
    const token=(await getSupabase()?.auth.getSession())?.data.session?.access_token;
-   if(parcelId&&token){
-     const payload=model==="ml"?{parcel_id:parcelId,model:"random_forest",period_end:last[last.length-1],weather:params}:{parcel_id:parcelId,model:"lstm",period_end:last[last.length-1],...params};
-     const r=await fetch(API_URL+"/api/analysis",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify(payload)});
-     const body=await r.json();
-     if(!r.ok)throw new Error(typeof body.detail==="string"?body.detail:"No se pudo guardar el análisis");
-     setResult(body.prediction);setSaveNote("Análisis guardado en el historial de la parcela.");
-     void loadHistory(parcelId);
-     return;
-   }
-   const path=model==="ml"?"/api/models/rainfall/forecast":"/api/models/rainfall/forecast-lstm";
-   const response=await fetch(API_URL+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(params)});
-   const body=await response.json();
-   if(!response.ok)throw new Error(typeof body.detail==="string"?body.detail:"La inferencia no está disponible");
-   setResult(body);
-  }catch(e){setError(e instanceof Error?e.message:"Error de predicción");}finally{setBusy(false)}
+   const outcome=await analyzeNewParcel(parcel,token);
+   setRecords(readLocalAnalysis());
+   setMessage(outcome.predictedRainMm===null?"El clima se ha consultado. La predicción todavía no está disponible.": "Se actualizó el análisis de tu terreno.");
+  }catch(e){setMessage(e instanceof Error?e.message:"No se pudieron consultar los datos ahora.");}
+  finally{setBusy(false)}
  }
- return <article className="ag-panel"><div className="ag-panel-title"><div><h2><BrainCircuit size={21}/> Predicción experimental ML/DL</h2><p>Estimación meteorológica para el día siguiente; no recomendación de cultivo</p></div></div>
-  <div className="ag-controls"><label>Parcela para registrar el análisis<select value={parcelId} onChange={e=>void loadHistory(e.target.value)}><option value="">Sin parcela (no guardar)</option>{parcels.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label></div>
-  <div className="ag-model-predict-controls"><label>Modelo<select value={model} onChange={e=>{setModel(e.target.value as "ml"|"dl");setResult(null);}}><option value="ml">Random Forest · ML</option><option value="dl">LSTM · Deep Learning</option></select></label><span>ML: {status?.ml||"desconocido"} · DL: {status?.dl||"desconocido"}</span><button className="ag-action" onClick={predict} disabled={busy||!weather}><RefreshCw size={14}/>{busy?"Analizando...":weather?"Recalcular":"Consulta clima para recalcular"}</button></div>
-  {error&&<p className="ag-alert" role="alert">{error}</p>}
-  {automatic.filter(a=>!parcelId||a.parcelId===parcelId).length>0&&<div className="ag-history"><h3>Resultados automáticos al registrar parcelas</h3>{automatic.filter(a=>!parcelId||a.parcelId===parcelId).map(a=><div className="ag-parcel" key={a.id}><div><b>{a.parcelName}</b><small>NASA POWER hasta {a.observedThrough} · {a.message}</small></div><strong>{a.predictedRainMm!==null?a.predictedRainMm.toFixed(2)+" mm":"Datos observados"}</strong></div>)}</div>}
-  {saveNote&&<p role="status" className="ag-muted">{saveNote}</p>}
-  {result&&<div className="ag-result"><strong>{result.predicted_precipitation_mm.toFixed(2)} mm</strong><span>{result.model} · horizonte de un día</span><small>{result.warning}</small></div>}
-  {parcelId&&<div className="ag-history"><h3>Historial de análisis de la parcela</h3>{history.length===0?<p className="ag-muted">Aún no hay predicciones registradas.</p>:history.map(item=><div key={item.id} className="ag-parcel"><span>{new Date(item.created_at).toLocaleDateString("es-PE")} · {item.model_name}</span><strong>{item.result?.predicted_precipitation_mm?.toFixed(2)??"—"} mm</strong></div>)}</div>}
-  {metrics&&<p className="ag-muted">Métricas experimentales publicadas por el entrenamiento. Consulta <a href={API_URL+"/api/models/metrics"} target="_blank" rel="noreferrer">el reporte de evaluación</a>.</p>}
- </article>;
+ return <section className="ag-panel ag-easy-analysis">
+  <div className="ag-panel-title"><div><h2><Leaf size={22}/> Así está tu terreno</h2><p>AGRONEX revisa automáticamente los datos de tu parcela y te explica el resultado.</p></div></div>
+  {parcels.length>0?<div className="ag-controls"><label>Terreno que deseas consultar<select value={current} onChange={e=>setSelected(e.target.value)}>{parcels.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label></div>:<div className="ag-easy-empty"><MapPin size={28}/><strong>Primero registra tu terreno</strong><p>Necesitamos su ubicación para consultar el clima y analizarlo.</p><a href="/dashboard?section=parcels">Registrar terreno</a></div>}
+  {parcel&&(record?<div className="ag-easy-result">
+    <div className="ag-easy-result-head"><CloudRain size={30}/><div><span>Último análisis de {parcel.name}</span><strong>{record.predictedRainMm!==null?record.predictedRainMm.toFixed(1)+" mm de lluvia estimada":"Datos climáticos consultados"}</strong></div></div>
+    <p>{record.predictedRainMm!==null?"Esta es una estimación experimental calculada con observaciones pasadas. Comprueba los avisos oficiales antes de decidir el riego.":"Tenemos datos observados de tu zona, pero no hay una predicción disponible para mostrar."}</p>
+    <div className="ag-easy-facts"><span><CalendarDays size={15}/> Datos hasta {record.observedThrough}</span><span>Temperatura media reciente: {record.temperatureC===null?"—":record.temperatureC.toFixed(1)+" °C"}</span><span>Lluvia media reciente: {record.observedRainMm===null?"—":record.observedRainMm.toFixed(1)+" mm/día"}</span></div>
+    <p className="ag-muted">Es información de apoyo. No mide directamente la humedad del suelo ni determina cuánto debes regar.</p>
+  </div>:<div className="ag-easy-empty"><CloudRain size={29}/><strong>Este terreno aún no tiene un análisis guardado</strong><p>El primer análisis comienza cuando registras la parcela. Puedes actualizarlo aquí si todavía no aparece.</p></div>)}
+  {parcel&&<button className="ag-action" disabled={busy} onClick={update}><RefreshCw size={16}/>{busy?"Analizando tu terreno...":"Actualizar análisis de mi terreno"}</button>}
+  {message&&<p className="ag-muted" role="status">{message}</p>}
+ </section>;
 }
