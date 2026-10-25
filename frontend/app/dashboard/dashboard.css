@@ -80,3 +80,25 @@
 .ag-panel{transition:box-shadow .18s ease}
 .ag-panel:hover{box-shadow:0 9px 25px rgba(23,76,47,.055)}
 @media(max-width:850px){.ag-health-grid{grid-template-columns:1fr}}
+
+/* Interfaz accesible para agricultores, móvil y escritorio */
+.ag-current-parcel{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;padding:14px 18px;background:#eaf6ec;border:1px solid #cfe9d5;border-radius:14px;margin:0 0 16px}
+.ag-current-parcel label{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:750;color:#184c32}
+.ag-current-parcel select,.ag-simple-form input,.ag-simple-form select{min-height:44px;padding:10px 12px;border:1px solid #c7ded0;border-radius:9px;background:#fff;color:#143e29;font-size:15px}
+.ag-current-parcel span{font-size:12px;color:#4e785a}
+.ag-simple-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.ag-simple-form label{display:flex;flex-direction:column;gap:7px;font-size:14px;font-weight:700;color:#28543a}
+.ag-simple-form input:disabled,.ag-simple-form select:disabled{opacity:.55}
+.ag-check-setting{display:flex;gap:10px;align-items:center;font-size:15px;margin:15px 0}
+.ag-friendly-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.ag-friendly-results article{background:#f1f8f2;border:1px solid #d5e8db;border-radius:14px;padding:19px}
+.ag-friendly-results article span{font-size:14px;font-weight:750;color:#2d6548}
+.ag-friendly-results article strong{display:block;font-size:25px;margin:12px 0;color:#123b27}
+.ag-friendly-results article p{line-height:1.6;font-size:15px;color:#365b45;margin:0}
+.ag-simple-climate>p{font-size:15px;line-height:1.65}
+.ag-parcel-page .ag-controls{align-items:end;flex-wrap:wrap}
+.ag-parcel-page .ag-controls label{min-width:155px}
+.ag-parcel-page .ag-controls input{font-size:16px;min-height:45px}
+.ag-action{min-height:41px}
+@media(max-width:920px){.ag-friendly-results{grid-template-columns:1fr}.ag-simple-form{grid-template-columns:1fr}}
+@media(max-width:600px){.ag-current-parcel label{flex-direction:column;align-items:flex-start}.ag-current-parcel select{max-width:100%}}
