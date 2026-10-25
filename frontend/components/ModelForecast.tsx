@@ -2,6 +2,7 @@
 import {useEffect,useState} from "react";
 import {BrainCircuit,RefreshCw} from "lucide-react";
 import {getSupabase} from "../lib/supabase";
+import {readLocalAnalysis,type ParcelAnalysis} from "../lib/parcelAnalysis";
 import {API_URL,type Weather,type Parcel} from "../lib/api";
 type State={ml:string;dl:string};
 type Output={predicted_precipitation_mm:number;model:string;warning:string};
@@ -13,9 +14,11 @@ export default function ModelForecast({weather,parcels}:{weather:Weather|null;pa
  const [parcelId,setParcelId]=useState("");
  const [history,setHistory]=useState<Array<{id:string;model_name:string;created_at:string;result:{predicted_precipitation_mm?:number}}>>([]);
  const [saveNote,setSaveNote]=useState("");
+ const [automatic,setAutomatic]=useState<ParcelAnalysis[]>([]);
  const [result,setResult]=useState<Output|null>(null);
  const [error,setError]=useState("");
  const [metrics,setMetrics]=useState<Record<string,unknown>|null>(null);
+ useEffect(()=>{const update=()=>setAutomatic(readLocalAnalysis());update();window.addEventListener("agronex:analysis",update);window.addEventListener("storage",update);return()=>{window.removeEventListener("agronex:analysis",update);window.removeEventListener("storage",update);}},[]);
  useEffect(()=>{fetch(API_URL+"/api/models/status").then(r=>r.json()).then(setStatus).catch(()=>setStatus(null));fetch(API_URL+"/api/models/metrics").then(r=>r.ok?r.json():null).then(setMetrics).catch(()=>setMetrics(null));},[]);
  async function loadHistory(id:string){
   setParcelId(id);setHistory([]);if(!id)return;
@@ -57,8 +60,9 @@ export default function ModelForecast({weather,parcels}:{weather:Weather|null;pa
  }
  return <article className="ag-panel"><div className="ag-panel-title"><div><h2><BrainCircuit size={21}/> Predicción experimental ML/DL</h2><p>Estimación meteorológica para el día siguiente; no recomendación de cultivo</p></div></div>
   <div className="ag-controls"><label>Parcela para registrar el análisis<select value={parcelId} onChange={e=>void loadHistory(e.target.value)}><option value="">Sin parcela (no guardar)</option>{parcels.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label></div>
-  <div className="ag-model-predict-controls"><label>Modelo<select value={model} onChange={e=>{setModel(e.target.value as "ml"|"dl");setResult(null);}}><option value="ml">Random Forest · ML</option><option value="dl">LSTM · Deep Learning</option></select></label><span>ML: {status?.ml||"desconocido"} · DL: {status?.dl||"desconocido"}</span><button className="ag-action" onClick={predict} disabled={busy}><RefreshCw size={14}/>{busy?"Analizando...":"Estimar precipitación"}</button></div>
+  <div className="ag-model-predict-controls"><label>Modelo<select value={model} onChange={e=>{setModel(e.target.value as "ml"|"dl");setResult(null);}}><option value="ml">Random Forest · ML</option><option value="dl">LSTM · Deep Learning</option></select></label><span>ML: {status?.ml||"desconocido"} · DL: {status?.dl||"desconocido"}</span><button className="ag-action" onClick={predict} disabled={busy||!weather}><RefreshCw size={14}/>{busy?"Analizando...":weather?"Recalcular":"Consulta clima para recalcular"}</button></div>
   {error&&<p className="ag-alert" role="alert">{error}</p>}
+  {automatic.filter(a=>!parcelId||a.parcelId===parcelId).length>0&&<div className="ag-history"><h3>Resultados automáticos al registrar parcelas</h3>{automatic.filter(a=>!parcelId||a.parcelId===parcelId).map(a=><div className="ag-parcel" key={a.id}><div><b>{a.parcelName}</b><small>NASA POWER hasta {a.observedThrough} · {a.message}</small></div><strong>{a.predictedRainMm!==null?a.predictedRainMm.toFixed(2)+" mm":"Datos observados"}</strong></div>)}</div>}
   {saveNote&&<p role="status" className="ag-muted">{saveNote}</p>}
   {result&&<div className="ag-result"><strong>{result.predicted_precipitation_mm.toFixed(2)} mm</strong><span>{result.model} · horizonte de un día</span><small>{result.warning}</small></div>}
   {parcelId&&<div className="ag-history"><h3>Historial de análisis de la parcela</h3>{history.length===0?<p className="ag-muted">Aún no hay predicciones registradas.</p>:history.map(item=><div key={item.id} className="ag-parcel"><span>{new Date(item.created_at).toLocaleDateString("es-PE")} · {item.model_name}</span><strong>{item.result?.predicted_precipitation_mm?.toFixed(2)??"—"} mm</strong></div>)}</div>}
