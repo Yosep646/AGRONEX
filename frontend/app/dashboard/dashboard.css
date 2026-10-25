@@ -180,3 +180,5 @@
 @media(max-width:800px){.ag-map-insights-grid{grid-template-columns:1fr}.ag-map-insights-header{flex-direction:column}}
 
 .ag-map-picked{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;margin-top:9px;background:#eaf7ee;border:1px solid #cde7d4;border-radius:10px;color:#245239;font-size:13px}.ag-map-picked button{margin-left:auto}
+
+.ag-label-toggle{display:flex!important;align-items:center;gap:8px;font-size:13px;font-weight:650;color:#214c33}.ag-label-toggle input{width:17px;height:17px;accent-color:#207a49}
