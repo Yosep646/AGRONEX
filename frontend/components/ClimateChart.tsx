@@ -1,7 +1,8 @@
 "use client";
 type Props={temperature?:Record<string,number|null>;rain?:Record<string,number|null>};
 export default function ClimateChart({temperature,rain}:Props){
- const dates=Object.keys(temperature||{}).filter(k=>typeof temperature?.[k]==="number"&&Number(temperature[k])>-900&&typeof rain?.[k]==="number"&&Number(rain[k])>=0).sort().slice(-14);
+ const temp=temperature||{},precip=rain||{};
+ const dates=Object.keys(temp).filter(k=>typeof temp[k]==="number"&&Number(temp[k])>-900&&typeof precip[k]==="number"&&Number(precip[k])>=0).sort().slice(-14);
  if(dates.length<2)return <div className="ag-feature-pending"><strong>Sin series climáticas cargadas</strong><span>Consulta NASA POWER para visualizar temperatura y lluvia observadas.</span></div>;
  const width=560,height=185,pad=25,innerW=width-2*pad,innerH=height-2*pad;
  const temps=dates.map(d=>Number(temperature![d]));const rains=dates.map(d=>Number(rain![d]));
