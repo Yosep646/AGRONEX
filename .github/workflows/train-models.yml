@@ -33,6 +33,9 @@ jobs:
     name: Entrenamiento y métricas
     runs-on: ubuntu-latest
     timeout-minutes: 55
+    concurrency:
+      group: agronex-model-training
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -55,6 +58,24 @@ jobs:
         run: python backend/app/dl_service.py --csv data/power_daily.csv --out backend/artifacts/weather_lstm.pt
       - name: Exportar reporte de evaluación
         run: python ml/report.py --ml backend/artifacts/weather_rf.joblib --dl backend/artifacts/weather_lstm.pt --out backend/artifacts/metrics.json
+      - name: Validar artefactos y métricas antes de publicar
+        run: |
+          python - <<'PY'
+          import json, math
+          from pathlib import Path
+          import joblib
+          import numpy as np
+          root=Path("backend/artifacts")
+          rf=joblib.load(root/"weather_rf.joblib")
+          with np.load(root/"weather_lstm.npz",allow_pickle=False) as lstm:
+              assert int(lstm["sequence_length"])==14
+              assert all(np.isfinite(lstm[k]).all() for k in ("weight_ih","weight_hh","bias_ih","bias_hh","linear_weight","linear_bias","mean","scale"))
+          report=json.loads((root/"metrics.json").read_text())
+          assert rf["features"] and report["random_forest"]["samples_test"]>=10
+          assert math.isfinite(report["random_forest"]["mae_ml_mm"])
+          assert math.isfinite(report["lstm"]["mae_test_mm"])
+          print("Modelos ML y DL evaluados y pesos comprobados")
+          PY
       - name: Publicar pesos experimentales validados por evaluación temporal
         run: |
           git config user.name "AGRONEX training bot"
