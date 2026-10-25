@@ -1,5 +1,13 @@
 name: AGRONEX - entrenamiento ML y DL
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/train-models.yml"
+      - "ml/train.py"
+      - "backend/app/dl_service.py"
+      - "backend/app/dl_inference.py"
+      - "data/export_power.py"
   workflow_dispatch:
     inputs:
       latitude:
@@ -19,12 +27,12 @@ on:
         required: true
         default: "20251231"
 permissions:
-  contents: read
+  contents: write
 jobs:
   training:
     name: Entrenamiento y métricas
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,10 +44,10 @@ jobs:
         run: pip install -r backend/requirements-ml.txt
       - name: Exportar observaciones NASA POWER
         env:
-          LAT: ${{ inputs.latitude }}
-          LON: ${{ inputs.longitude }}
-          START: ${{ inputs.start }}
-          END: ${{ inputs.end }}
+          LAT: ${{ inputs.latitude || '-9.93' }}
+          LON: ${{ inputs.longitude || '-76.24' }}
+          START: ${{ inputs.start || '20210101' }}
+          END: ${{ inputs.end || '20251231' }}
         run: python data/export_power.py --latitude "$LAT" --longitude "$LON" --start "$START" --end "$END" --out data/power_daily.csv
       - name: Entrenar Random Forest
         run: python ml/train.py --csv data/power_daily.csv --out backend/artifacts/weather_rf.joblib
@@ -47,6 +55,13 @@ jobs:
         run: python backend/app/dl_service.py --csv data/power_daily.csv --out backend/artifacts/weather_lstm.pt
       - name: Exportar reporte de evaluación
         run: python ml/report.py --ml backend/artifacts/weather_rf.joblib --dl backend/artifacts/weather_lstm.pt --out backend/artifacts/metrics.json
+      - name: Publicar pesos experimentales validados por evaluación temporal
+        run: |
+          git config user.name "AGRONEX training bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f backend/artifacts/weather_rf.joblib backend/artifacts/weather_lstm.npz backend/artifacts/metrics.json
+          git commit -m "chore(models): actualizar pesos y métricas NASA POWER [skip ci]"
+          git push origin HEAD:main
       - name: Guardar modelos entrenados y métricas
         uses: actions/upload-artifact@v4
         with:
