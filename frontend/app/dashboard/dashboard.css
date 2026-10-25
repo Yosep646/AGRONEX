@@ -162,3 +162,5 @@
 .ag-easy-facts span{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #dbeadf;border-radius:9px;padding:10px;font-size:12px}
 .ag-easy-empty{background:#f3f9f5;border:1px dashed #c9e4d1;border-radius:14px;padding:25px;display:flex;align-items:center;flex-direction:column;gap:9px;text-align:center}
 .ag-easy-empty strong{font-size:17px;color:#1b5635}.ag-easy-empty p{margin:0;font-size:14px;color:#597866}.ag-easy-empty a{color:#187446;font-weight:700}
+
+.ag-readable-report>.ag-panel-title{margin-bottom:19px}.ag-readable-report .ag-controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.ag-readable-report .ag-controls label{min-width:220px;flex:1}.ag-readable-report .ag-simple-climate{margin:18px 0;border:1px solid #dcefe1;background:#f9fdf9}.ag-readable-report .ag-climate-chart{max-width:900px;margin:20px auto}.ag-readable-report .ag-easy-empty{margin:18px 0}.ag-readable-report .ag-action{min-height:44px;padding:11px 16px}
