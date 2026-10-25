@@ -4,6 +4,7 @@ import Link from "next/link";
 import {Leaf,LayoutDashboard,Satellite,CloudSun,BrainCircuit,MapPin,ShieldCheck,Droplets,Sun,RefreshCw,ArrowUpRight,Database,Activity,BarChart3,ExternalLink,Search,Bell,FileText,Settings,CalendarDays,TrendingUp} from "lucide-react";
 import {getSupabase} from "../../lib/supabase";
 import SatelliteMap from "../../components/SatelliteMap";
+import ClimateChart from "../../components/ClimateChart";
 import {addParcel,getParcels,getWeather,type Parcel,type Weather,API_URL} from "../../lib/api";
 
 const links=[{name:"Panel general",icon:LayoutDashboard,href:"/dashboard"},{name:"Mis parcelas",icon:MapPin,href:"/dashboard?section=parcels"},{name:"Visión satelital",icon:Satellite,href:"/dashboard?section=satellite"},{name:"Clima NASA",icon:CloudSun,href:"/dashboard?section=climate"},{name:"Análisis e IA",icon:BrainCircuit,href:"/dashboard?section=ai"},{name:"Reportes",icon:FileText,href:"/dashboard?section=reports"},{name:"Configuración",icon:Settings,href:"/dashboard?section=settings"}];
@@ -96,7 +97,7 @@ export default function Dashboard(){
     </div>
    </section>
    <section className="ag-lower-grid">
-     <article className="ag-panel"><div className="ag-panel-title"><div><h2><TrendingUp size={20}/> Condiciones climáticas NASA</h2><p>Resumen del periodo histórico consultado, no pronóstico</p></div><button className="ag-action" onClick={()=>setSection("climate")}>Explorar</button></div><div className="ag-measures"><div><Sun/><span>Temperatura media</span><strong>{mean(weather?.data.T2M)} °C</strong></div><div><Droplets/><span>Lluvia diaria media</span><strong>{mean(weather?.data.PRECTOTCORR)} mm</strong></div><div><Activity/><span>Radiación media</span><strong>{mean(weather?.data.ALLSKY_SFC_SW_DWN)}</strong></div></div></article>
+     <article className="ag-panel"><div className="ag-panel-title"><div><h2><TrendingUp size={20}/> Condiciones climáticas NASA</h2><p>Resumen del periodo histórico consultado, no pronóstico</p></div><button className="ag-action" onClick={()=>setSection("climate")}>Explorar</button></div><ClimateChart temperature={weather?.data.T2M} rain={weather?.data.PRECTOTCORR}/><button className="ag-action" onClick={refresh} disabled={busy}>{busy?"Consultando NASA...":"Actualizar datos NASA"}</button>{error&&<p className="ag-alert" role="alert">{error}</p>}</article>
      <article className="ag-panel"><div className="ag-panel-title"><div><h2><Leaf size={20}/> Vegetación (NDVI)</h2><p>Procesamiento de imágenes HLS</p></div></div><div className="ag-feature-pending"><Leaf size={27}/><strong>Pendiente de datos HLS procesados</strong><span>No se mostrará un mapa NDVI ficticio.</span></div></article>
      <article className="ag-panel"><div className="ag-panel-title"><div><h2><ShieldCheck size={20}/> Recomendaciones</h2><p>Basadas en datos y reglas agronómicas validadas</p></div></div><div className="ag-feature-pending"><BrainCircuit size={27}/><strong>Motor agronómico en desarrollo</strong><span>Se habilitará después de validar los modelos y las reglas de cultivo.</span></div></article>
    </section>
